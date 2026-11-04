@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SafeSpends Life Planner</title>
+<style>
+/* ============ SafeSpends Life Planner — warm cream system (terracotta accent) ============ */
+:root{
+  --bg:#FBF6EE; --bg2:#FFFFFF; --card:#FFFFFF; --card2:#FDF9F2; --ink:#3B2A20; --mut:#8A7A6B;
+  --line:#EADFCF; --vio:#C05B2E; --vioD:#A34E26; --vioSoft:rgba(192,91,46,.12);
+  --lime:#C05B2E; --limeD:#A34E26; --limeInk:#FFFFFF; --limeSoft:rgba(192,91,46,.12);
+  --bad:#D43A3A; --r:20px; --nav:rgba(251,246,238,.94);
+}
+[data-theme="dark"]{
+  --bg:#241C17; --bg2:#2E231C; --card:#332820; --card2:#3D2F24; --ink:#F5EDE3; --mut:#B8A99A;
+  --line:#4A3B30; --vio:#E8A87C; --vioD:#D98F5F; --vioSoft:rgba(232,168,124,.16);
+  --lime:#E8A87C; --limeD:#D98F5F; --limeInk:#241C17; --limeSoft:rgba(232,168,124,.16);
+  --bad:#FF8484; --nav:rgba(36,28,23,.92);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; font-size:var(--fs,16px); line-height:1.45}
+h1,h2,h3{font-family:Georgia,'Times New Roman',serif; line-height:1.2}
+h1{font-size:1.9em;margin:.2em 0} h2{font-size:1.4em;margin:.3em 0} h3{font-size:1.1em;margin:.4em 0}
+.wrap{max-width:620px; margin:0 auto; padding:14px 14px 118px}
+/* header (V4: lime mark + brand + small-caps subtitle + icon buttons) */
+header.top{display:flex; align-items:center; gap:10px; padding:6px 2px 14px}
+.mark{width:38px;height:38px;border-radius:12px;background:var(--lime);color:var(--limeInk);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;flex:none}
+.brand{font-weight:800; font-size:19px; letter-spacing:.2px; line-height:1.1}
+.brand small{display:block; font-weight:600; font-size:11.5px; color:var(--mut); letter-spacing:.4px; text-transform:uppercase}
+.topsp{flex:1}
+.iconbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:17px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:1;padding:0;flex:none}
+/* generic */
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:18px; margin:0 0 14px}
+.card h3{margin:0 0 4px; font-size:16.5px}
+.row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.grow{flex:1}
+.mut{color:var(--mut)} .small{font-size:13px} .tiny{font-size:12px}
+.hint{color:var(--mut); font-size:.92em}
+.ok{color:var(--limeD)} [data-theme="dark"] .ok{color:var(--lime)}
+.warn{color:var(--bad)}
+/* buttons (V4 primary = lime) */
+button{font:inherit; cursor:pointer; border:none; border-radius:14px; padding:12px 16px; font-size:15px; font-weight:700; background:var(--lime); color:var(--limeInk)}
+button.ghost{background:transparent; color:var(--ink); border:1.5px solid var(--line)}
+button.small{padding:7px 11px; font-size:13.5px; border-radius:10px}
+button:disabled{opacity:.45; cursor:default}
+/* forms (V4) */
+input,select,textarea{width:100%; background:var(--card2); color:var(--ink); border:1.5px solid var(--line); border-radius:12px; padding:11px 12px; font-size:15.5px; font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--lime); outline-offset:0; border-color:transparent}
+input[type=checkbox]{width:auto; transform:scale(1.3); accent-color:var(--lime)}
+input[type=range]{padding:0}
+/* chips + area tints (pastel bg + dark text: readable on both themes) */
+.chip{display:inline-block; padding:.2em .7em; border-radius:999px; font-size:.82em; background:var(--card2); border:1px solid var(--line); margin:2px}
+.area-Home{background:#DCEEDD;color:#3B2A20}.area-Work{background:#DCE8F2;color:#3B2A20}.area-Health{background:#D7ECE8;color:#3B2A20}.area-Money{background:#F6E6C8;color:#3B2A20}.area-People{background:#F6DCE2;color:#3B2A20}.area-Me{background:#E6DEF2;color:#3B2A20}
+/* lists + tabs */
+.taskrow{display:flex; gap:10px; align-items:flex-start; padding:11px 2px; border-bottom:1px solid var(--line)}
+.taskrow:last-child{border-bottom:none}
+.pilltabs{display:flex; gap:8px; flex-wrap:wrap}
+.pilltabs button{background:var(--card); color:var(--ink); border:1.5px solid var(--line); border-radius:999px; padding:9px 14px; font-size:14px}
+.pilltabs button.on{background:var(--lime); border-color:var(--lime); color:var(--limeInk)}
+/* timeline + rings + bars */
+.timeline{position:relative; border-left:3px solid var(--line); margin-left:10px}
+.hour{position:relative; padding:6px 0 6px 16px; min-height:34px; border-bottom:1px dashed var(--line); font-size:.9em; color:var(--mut)}
+.ev{border-radius:12px; padding:6px 10px; color:#3B2A20; font-size:.92em; margin:3px 0}
+.nowline{height:3px; background:var(--bad); border-radius:3px; position:relative}
+.nowline:after{content:"now"; position:absolute; right:0; top:-18px; font-size:.75em; color:var(--bad); font-weight:700}
+.ring{width:110px;height:110px}.ring circle{fill:none;stroke-width:10;stroke-linecap:round}.ring .bg{stroke:var(--line)} .ring .fg{stroke:var(--lime)}
+.bar{height:9px; background:var(--card2); border:1px solid var(--line); border-radius:99px; overflow:hidden}
+.bar i{display:block; height:100%; background:var(--lime); border-radius:99px}
+/* grids + week + month */
+.grid{display:grid; grid-template-columns:1fr; gap:14px}
+.weekcol{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px}
+.monthgrid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px}
+.mday{border:1px solid var(--line); border-radius:12px; min-height:64px; padding:6px; background:var(--card); cursor:pointer; font-size:.85em}
+.mday.today{border-color:var(--lime); box-shadow:0 0 0 1px var(--lime)}
+/* modal + sheet + focus */
+.modal{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:flex-start; justify-content:center; padding:20px; z-index:50; overflow:auto}
+.modal.open{display:flex}
+.modalbox{background:var(--bg2); border:1px solid var(--line); border-radius:24px; padding:22px; width:100%; max-width:560px; color:var(--ink)}
+.sheet{position:fixed; left:0; right:0; bottom:0; z-index:55; background:var(--bg2); border-radius:24px 24px 0 0; border-top:1px solid var(--line); max-width:620px; margin:0 auto; padding:18px 18px calc(20px + env(safe-area-inset-bottom)); display:none; max-height:88vh; overflow-y:auto}
+.sheet.open{display:block}
+.focusov{position:fixed; inset:0; background:var(--bg); display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; z-index:60; text-align:center; padding:20px}
+.focusov.open{display:flex}
+.bigclock{font-family:Georgia,serif; font-size:3.2em}
+/* bottom nav (V4) */
+.bottombar{position:fixed; left:0; right:0; bottom:0; background:var(--nav); backdrop-filter:blur(12px); border-top:1px solid var(--line); z-index:40; display:flex; justify-content:space-around; max-width:620px; margin:0 auto; padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+.bottombar button{background:none; border:none; color:var(--mut); font-size:11.5px; font-weight:700; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; padding:5px 8px; border-radius:10px}
+.bottombar button.active{color:var(--ink); box-shadow:inset 0 3px 0 var(--lime)}
+.footer-note{text-align:center; color:var(--mut); font-size:13px; margin:26px 0 4px; line-height:1.5; padding:0 10px}
+.view{display:none} .view.active{display:block}
+
+
+/* sidebar (wide screens only) + responsive switch */
+.sidebar{display:none; position:fixed; left:0; top:0; bottom:0; width:250px; background:var(--card); border-right:1px solid var(--line); padding:18px 14px; overflow:auto; z-index:5}
+.logo{font-family:Georgia,serif; font-size:1.5em; font-weight:700}
+.logo span{color:var(--lime)}
+.sidebtn{display:block; width:100%; text-align:left; margin:6px 0; background:var(--card2); color:var(--ink); border:1px solid var(--line)}
+.sidebtn.active{background:var(--lime); color:var(--limeInk); border-color:transparent}
+.sidegroup{font-size:.75em; letter-spacing:.12em; color:var(--mut); margin:16px 8px 4px; font-weight:700}
+.badge{float:right; background:#E8A87C; color:#3B2A20; border-radius:999px; padding:0 .55em; font-size:.8em}
+@media(min-width:960px){
+  .sidebar{display:block}
+  header.top{display:none}
+  .wrap{max-width:860px; margin:0 0 0 250px; padding:24px 24px 40px}
+  .bottombar{display:none}
+}
+
+</style></head>
+<body>
+<div style="position:sticky;top:0;z-index:999;background:#C05B2E;color:#FBF6EE;text-align:center;padding:10px 12px;font-weight:700;font-size:14px">FREE DEMO · Sample data · Nothing you change here is saved — reload to reset everything</div>
+<nav class="sidebar" id="sidebar">
+<div class="logo">Safe<span>Spends</span> Life</div>
+<p class="hint" style="margin:4px 0 12px">Your whole life, in one calm place. No account. Your data stays only on this device.</p>
+<button class="sidebtn" onclick="openQuickAdd()">＋ Quick add (N)</button>
+<button class="sidebtn" onclick="openFocus()">◉ Focus (F)</button>
+<div id="navlist"></div>
+<div class="sidegroup">MONEY &amp; HOME</div>
+<button class="sidebtn" data-nav="money">💰 Money</button>
+<button class="sidebtn" data-nav="meals">🍽 Meals &amp; groceries</button>
+<button class="sidebtn" data-nav="home">🏠 Home</button>
+<button class="sidebtn" data-nav="work">💼 Work &amp; study</button>
+<button class="sidebtn" data-nav="wellness">💚 Wellness</button>
+<div class="sidegroup">AT THE BOTTOM</div>
+<button class="sidebtn" onclick="openCheckin()">🌤 Check in</button>
+<button class="sidebtn" data-nav="settings">⚙ Settings</button>
+<p class="hint" style="margin-top:14px">One-time purchase product. No subscription, no login, no cloud sync.</p>
+</nav>
+<div class="wrap">
+<header class="top"><div class="mark">S</div><div class="brand">SafeSpends<small>Life Planner</small></div><div class="topsp"></div><button class="iconbtn" onclick="openQuickAdd()" title="Quick add">＋</button><button class="iconbtn" onclick="openFocus()" title="Focus">◉</button><button class="iconbtn" onclick="openCheckin()" title="Check in">🌤</button></header>
+<main>
+<section class="view active" id="view-today"></section>
+<section class="view" id="view-braindump"></section>
+<section class="view" id="view-schedule"></section>
+<section class="view" id="view-tasks"></section>
+<section class="view" id="view-week"></section>
+<section class="view" id="view-month"></section>
+<section class="view" id="view-habits"></section>
+<section class="view" id="view-routines"></section>
+<section class="view" id="view-goals"></section>
+<section class="view" id="view-upcoming"></section>
+<section class="view" id="view-notes"></section>
+<section class="view" id="view-progress"></section>
+<section class="view" id="view-money"></section>
+<section class="view" id="view-meals"></section>
+<section class="view" id="view-home"></section>
+<section class="view" id="view-work"></section>
+<section class="view" id="view-wellness"></section>
+<section class="view" id="view-settings"></section>
+</main>
+<p class="footer-note">Your whole life, in one calm place. No account. Your data stays only on this device.</p>
+<p class="footer-note">One-time purchase product. No subscription, no login, no cloud sync.</p>
+</div>
+<nav class="bottombar">
+<button data-nav="today" onclick="showView('today')">🏠<br>Today</button>
+<button data-nav="tasks" onclick="showView('tasks')">✓<br>Tasks</button>
+<button data-nav="braindump" onclick="showView('braindump')">💭<br>Brain dump</button>
+<button data-nav="habits" onclick="showView('habits')">🌱<br>Habits</button>
+<button onclick="document.getElementById('moresheet').classList.add('open')">⋯<br>More</button>
+</nav>
+<div class="sheet" id="moresheet"><h2>All sections</h2><div id="sheetlist" class="row"></div><button class="ghost" onclick="document.getElementById('moresheet').classList.remove('open')">Close</button></div>
+<div class="modal" id="modal"><div class="modalbox" id="modalbox"></div></div>
+<div class="modal" id="checkinModal"><div class="modalbox" id="checkinBox"></div></div>
+<div class="modal" id="quickModal"><div class="modalbox" id="quickBox"></div></div>
+<div class="focusov" id="focusov"></div>
+<script>window.__DEMO__=true;</script>
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const LS='safespends.life';
+const AREAS=['Home','Work','Health','Money','People','Me'];
+const AREA_TINT={Home:'area-Home',Work:'area-Work',Health:'area-Health',Money:'area-Money',People:'area-People',Me:'area-Me'};
+const pad=n=>String(n).padStart(2,'0');
+const todayStr=(d=new Date())=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const addDays=(ds,n)=>{const d=new Date(ds+'T12:00:00');d.setDate(d.getDate()+n);return todayStr(d)};
+const fmt=(ds)=>{const d=new Date(ds+'T12:00:00');return d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})};
+const fmtTime=m=>{const h=Math.floor(m/60),mi=m%60;if(state.settings.timeFormat==='24')return pad(h)+':'+pad(mi);const ap=h>=12?'PM':'AM';let hh=h%12||12;return hh+':'+pad(mi)+' '+ap};
+const uid=()=> 'id'+Math.random().toString(36).slice(2,9);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const T=todayStr(), TOM=addDays(T,1);
+function sample(){
+ const wkStart=(()=>{const d=new Date(T+'T12:00:00');const day=d.getDay();const mon=(day+6)%7;d.setDate(d.getDate()-mon);return todayStr(d)})();
+ const mkTask=(title,area,due,dur,top,steps)=>({id:uid(),title,area,due,dur:dur||20,top:!!top,done:false,steps:(steps||[]).map(s=>({t:s,done:false})),tiny:'',later:false,from:''});
+ return {settings:{name:'Sam',weekStart:'Mon',theme:0,dark:false,reduceMotion:false,textSize:16,dayStart:7,dayEnd:22,timeFormat:'12',buffer:true},
+ tasks:[mkTask('Put the laundry in the machine','Home',T,15,true,['Sort dark clothes','Start the machine']),mkTask('Send the invoice for the logo work','Work',T,20,true,['Open the invoice file','Check the total','Send it']),mkTask('Call mum back','People',T,10,true),mkTask('Pay the electricity bill','Money',T,10),mkTask('Water the plants','Home',T,5),mkTask('Prepare slides for Friday meeting','Work',TOM,45, false,['Open last deck','Add 3 slides']),mkTask('Book the dentist check-up','Health',addDays(T,2),10),mkTask('Read 10 pages before bed','Me',TOM,20)],
+ events:[{id:uid(),title:'Morning walk',date:T,start:7*60,dur:30,area:'Health'},{id:uid(),title:'Team call',date:T,start:10*60,dur:45,area:'Work'},{id:uid(),title:'Lunch with a friend',date:T,start:13*60,dur:60,area:'People'},{id:uid(),title:'Dentist check-up',date:addDays(T,2),start:9*60,dur:30,area:'Health'}],
+ brain:[{id:uid(),text:'Idea: start a small herb pot on the balcony'},{id:uid(),text:'Buy a birthday gift for Sara before Saturday'},{id:uid(),text:'Look up a simple stretching routine'},{id:uid(),text:'Fix the squeaky kitchen drawer'}],
+ later:[{id:uid(),text:'Plan a weekend trip in spring'}],
+ habits:[{id:uid(),name:'Drink a glass of water at breakfast',cue:'Right after breakfast',tiny:'Sip half a glass',log:{},rest:[]},{id:uid(),name:'10-minute tidy',cue:'After lunch',tiny:'Tidy one surface',log:{},rest:[]},{id:uid(),name:'Evening walk',cue:'After dinner',tiny:'Walk around the block',log:{},rest:[]}],
+ routines:[{id:uid(),name:'Morning start',when:'Every day, 7:30 AM',steps:[['Drink water',2],['Make the bed',3],['Write today\'s three',5],['Check the calendar',3]],short:5},{id:uid(),name:'Leaving the house',when:'Whenever you need it',steps:[['Keys, wallet, phone',1],['Lights off',1],['Lock the door',1]],short:2},{id:uid(),name:'Evening wind-down',when:'Every evening',steps:[['Tidy one room',10],['Lay out tomorrow\'s clothes',5],['Charge the phone',1]],short:6}],
+ goals:[{id:uid(),type:'Goal',title:'Save for a short break',due:addDays(T,60),pct:33,next:'Move a small amount to the break pot',done:false},{id:uid(),type:'Project',title:'Refresh the living room',due:addDays(T,21),pct:20,next:'Pick paint colours this weekend',done:false},{id:uid(),type:'Goal',title:'Walk 3 times a week',due:addDays(T,30),pct:67,next:'Walk on Thursday',done:false}],
+ notes:[{id:uid(),title:'Ideas for the weekend',body:'- Try the new park trail\n- Bake banana bread\n- Call old friends',date:T,pinned:true},{id:uid(),title:'Books to read',body:'- A short book on focus\n- A cookbook for busy weeks',date:addDays(T,-2),pinned:false}],
+ checkins:[],focusMinutes:0,gentle:false,weekOffset:0,monthOffset:0,showFurther:false,
+ money:{balance:420,payday:addDays(T,12),savings:60,income:1500,bills:[{id:uid(),name:'Electricity',amount:45,due:addDays(T,5),paid:false},{id:uid(),name:'Phone',amount:25,due:addDays(T,9),paid:false}],spending:[{id:uid(),what:'Groceries',amount:32,date:T}],pots:[{id:uid(),name:'Break fund',target:300,saved:100},{id:uid(),name:'Safety cushion',target:500,saved:210}],debts:[{id:uid(),name:'Card',balance:900,apr:18,min:30},{id:uid(),name:'Store loan',balance:400,apr:9,min:20}],debtMode:'Snowball',extra:50},
+ meals:{},grocery:[{id:uid(),item:'Eggs',done:false},{id:uid(),item:'Bread',done:false}],
+ chores:[{id:uid(),name:'Vacuum the living room',repeat:'Weekly',done:false},{id:uid(),name:'Take out recycling',repeat:'Every 3 days',done:false}],
+ maintenance:[{id:uid(),what:'Changed the air filter',date:addDays(T,-10)}],
+ inventory:[{id:uid(),item:'Spare light bulbs',qty:4},{id:uid(),item:'First-aid kit',qty:1}],
+ contacts:[{id:uid(),name:'Neighbour — Ayesha',phone:'555-0101',note:'Spare key holder'}],
+ assignments:[{id:uid(),title:'History essay draft',due:addDays(T,4),done:false}],
+ classes:[{id:uid(),time:'Mon 9:00 AM',name:'Design class'}],
+ exams:[{id:uid(),name:'Maths quiz',date:addDays(T,10)}],
+ grades:[{id:uid(),subject:'Design',grade:'B+'}],
+ workNotes:[{id:uid(),text:'Keep a list of questions for Friday meeting'}],
+ wellness:{sleep:[{date:T,hours:7}],movement:[{date:T,what:'Walk 20 min'}],meds:[{id:uid(),name:'Vitamin D',taken:false}],water:{date:T,glasses:3},weight:[{date:T,kg:72}],heightCm:170,unit:'kg'},
+ taskFilter:'All',taskTab:'Today'};
+}
+let state;if(window.__DEMO__){state=sample()}else{try{state=JSON.parse(localStorage.getItem(LS))||sample()}catch(e){state=sample()}}
+if(!state.settings)state=sample();
+function save(){if(window.__DEMO__)return;try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}}
+function applySettings(){document.documentElement.setAttribute('data-theme',state.settings.dark?'dark':'light');document.documentElement.style.setProperty('--fs',state.settings.textSize+'px');const accents=['#C05B2E','#2E7D6B','#3A6EA5','#7A5C9E','#B03A5B','#8A6D1B'];const acc=accents[state.settings.theme||0];const st=document.documentElement.style;st.setProperty('--accent',acc);st.setProperty('--lime',acc);const _r=parseInt(acc.slice(1,3),16),_g=parseInt(acc.slice(3,5),16),_b=parseInt(acc.slice(5,7),16);const _dk=v=>Math.round(v*0.72);st.setProperty('--limeD','#'+[_dk(_r),_dk(_g),_dk(_b)].map(v=>v.toString(16).padStart(2,'0')).join(''));st.setProperty('--limeInk',(0.299*_r+0.587*_g+0.114*_b)>150?'#3B2A20':'#FFFFFF');}
+const NAV=[['today','🏠 Today'],['braindump','💭 Brain dump'],['schedule','🗓 Schedule'],['tasks','✓ Tasks'],['week','📅 This week'],['month','🗓 Month'],['habits','🌱 Habits'],['routines','🔁 Routines'],['goals','🎯 Goals & projects'],['upcoming','⏭ Upcoming'],['notes','📝 Notes'],['progress','📈 Progress']];
+function renderNav(){const counts={braindump:state.brain.length,tasks:state.tasks.filter(t=>!t.done&&!t.later).length,habits:state.habits.length,goals:state.goals.filter(g=>!g.done).length};
+ $('#navlist').innerHTML='<div class="sidegroup">PLAN YOUR DAY</div>'+NAV.slice(0,6).map(([id,l])=>`<button class="sidebtn" data-nav="${id}">${l}${counts[id]?`<span class="badge">${counts[id]}</span>`:''}</button>`).join('')+'<div class="sidegroup">RHYTHMS</div>'+NAV.slice(6,8).map(([id,l])=>`<button class="sidebtn" data-nav="${id}">${l}${counts[id]?`<span class="badge">${counts[id]}</span>`:''}</button>`).join('')+'<div class="sidegroup">BIGGER PICTURE</div>'+NAV.slice(8).map(([id,l])=>`<button class="sidebtn" data-nav="${id}">${l}${counts[id]?`<span class="badge">${counts[id]}</span>`:''}</button>`).join('');
+ $('#sheetlist').innerHTML=NAV.map(([id,l])=>`<button class="ghost" onclick="showView('${id}');document.getElementById('moresheet').classList.remove('open')">${l}</button>`).join('')+['money','meals','home','work','wellness','settings'].map(id=>`<button class="ghost" onclick="showView('${id}');document.getElementById('moresheet').classList.remove('open')">${id}</button>`).join('');
+ $$('[data-nav]').forEach(b=>b.onclick=()=>showView(b.dataset.nav));}
+let current='today';
+function showView(id){current=id;$$('.view').forEach(v=>v.classList.remove('active'));const el=$('#view-'+id);if(el)el.classList.add('active');$$('[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===id));window.scrollTo(0,0);renderAll();}
+function ring(pct,size){size=size||110;const r=44,c=2*Math.PI*r,off=c*(1-pct/100);return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 110 110"><circle class="bg" cx="55" cy="55" r="${r}"/><circle class="fg" cx="55" cy="55" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 55 55)"/><text x="55" y="60" text-anchor="middle" font-size="20" font-weight="700" fill="var(--ink)">${Math.round(pct)}%</text></svg>`;}
+function modal(html){$('#modalbox').innerHTML=html;$('#modal').classList.add('open');}
+function closeModal(){$('#modal').classList.remove('open');}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+function toast(m){const d=document.createElement('div');d.textContent=m;d.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;z-index:99';document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
+const hourLabel=m=>fmtTime(m);
+function todaysTasks(){return state.tasks.filter(t=>!t.done&&!t.later&&(state.gentle?t.dur<=15:true))}
+function renderTasks(){
+ const tabs=['Today','Coming up','Any time','Later','Done'];
+ const list=state.tasks.filter(t=>{
+  if(state.taskFilter!=='All'&&t.area!==state.taskFilter)return false;
+  if(state.taskTab==='Today')return t.due===T&&!t.done&&!t.later;
+  if(state.taskTab==='Coming up')return t.due>T&&!t.done&&!t.later;
+  if(state.taskTab==='Any time')return !t.done&&!t.later&&!t.due;
+  if(state.taskTab==='Later')return t.later&&!t.done;
+  if(state.taskTab==='Done')return t.done;
+  return true;});
+ $('#view-tasks').innerHTML=`<h1>Tasks</h1><div class="row pilltabs">${tabs.map(tb=>`<button class="${state.taskTab===tb?'on':''}" onclick="state.taskTab='${tb}';renderAll()">${tb}</button>`).join('')}</div>
+ <div class="row" style="margin-top:10px">${['All',...AREAS].map(a=>`<button class="ghost small" onclick="state.taskFilter='${a}';renderAll()">${a}</button>`).join('')}</div>
+ <div class="card"><div class="row"><input id="taskAdd" placeholder="Add a task…"><button onclick="addTaskFromInput()">Add</button></div><p class="hint">Tip: "!" puts it in Today's three. "~20m" sets the minutes. "#Area" sets the area.</p></div>
+ <div class="card">${list.map(t=>`<div class="taskrow"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')"><div style="flex:1"><b>${esc(t.title)}</b><br><span class="chip ${AREA_TINT[t.area]}">${t.area}</span> <span class="chip">${t.due?fmt(t.due):'Any time'}</span> <span class="chip">${t.dur} min</span> ${t.steps.length?`<span class="chip">${t.steps.filter(s=>s.done).length}/${t.steps.length} steps</span>`:''}</div><button class="ghost small" onclick="taskDetail('${t.id}')">Open</button></div>`).join('')||'<p class="hint">Nothing here. A blank list is fine.</p>'}</div>`;
+ const inp=$('#taskAdd');if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')addTaskFromInput()});
+}
+function addTaskFromInput(){const v=$('#taskAdd').value.trim();if(!v)return;const p=parseQuick(v,'Task');state.tasks.push({id:uid(),title:p.title||v,area:p.area||'Home',due:p.due||'',dur:p.dur||20,top:!!p.top,done:false,steps:[],tiny:'',later:false,from:''});save();renderAll();}
+function taskDetail(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;
+ modal(`<h2>${esc(t.title)}</h2><p><span class="chip ${AREA_TINT[t.area]}">${t.area}</span> <span class="chip">${t.dur} min</span> <span class="chip">${t.due?fmt(t.due):'Any time'}</span></p>
+ <label>First tiny step</label><input id="tinyIn" value="${esc(t.tiny)}" placeholder="The smallest possible first move">
+ <h3>Steps</h3><div>${t.steps.map((s,i)=>`<label style="display:block"><input type="checkbox" ${s.done?'checked':''} onchange="toggleStep('${id}',${i})"> ${esc(s.t)}</label>`).join('')||'<p class="hint">No steps yet.</p>'}</div>
+ <div class="row" style="margin-top:10px"><input id="stepIn" placeholder="Add a step"><button class="small" onclick="addStep('${id}')">Add step</button></div>
+ <div class="row" style="margin-top:14px"><button onclick="saveTiny('${id}')">Save tiny step</button><button class="ghost" onclick="closeModal();stuckFor('${id}')">Help me start</button><button class="ghost" onclick="makeTop3('${id}')">Today's three</button><button class="ghost" onclick="parkTask('${id}')">Not today</button><button class="ghost" onclick="deleteTask('${id}')">Delete</button></div>
+ <button class="ghost" style="margin-top:10px" onclick="closeModal()">Close</button>`);}
+function toggleStep(id,i){const t=state.tasks.find(x=>x.id===id);if(t&&t.steps[i]){t.steps[i].done=!t.steps[i].done;save();taskDetail(id);}}
+function addStep(id){const v=$('#stepIn').value.trim();if(!v)return;const t=state.tasks.find(x=>x.id===id);t.steps.push({t:v,done:false});save();taskDetail(id);}
+function saveTiny(id){const t=state.tasks.find(x=>x.id===id);t.tiny=$('#tinyIn').value.trim();save();closeModal();renderAll();toast('Tiny step saved.');}
+function makeTop3(id){const t=state.tasks.find(x=>x.id===id);t.top=true;t.later=false;if(!t.due)t.due=T;save();closeModal();renderAll();toast("Added to Today's three.");}
+function parkTask(id){const t=state.tasks.find(x=>x.id===id);t.later=true;t.top=false;save();closeModal();renderAll();}
+function deleteTask(id){state.tasks=state.tasks.filter(x=>x.id!==id);save();closeModal();renderAll();}
+function renderWeek(){
+ const base=new Date(T+'T12:00:00');base.setDate(base.getDate()+state.weekOffset*7);const dayIdx=base.getDay();const mon=new Date(base);mon.setDate(base.getDate()-((dayIdx+6)%7));
+ const days=[...Array(7)].map((_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return todayStr(d)});
+ const top3=state.tasks.filter(t=>t.top&&!t.done);
+ $('#view-week').innerHTML=`<h1>This week</h1><div class="row"><button class="ghost" onclick="state.weekOffset--;renderAll()">‹ Prev</button><button class="ghost" onclick="state.weekOffset=0;renderAll()">This week</button><button class="ghost" onclick="state.weekOffset++;renderAll()">Next ›</button><button onclick="weeklyReset()">Weekly reset</button></div>
+ <div class="grid">${days.map(d=>{const evs=state.events.filter(e=>e.date===d);const ts=state.tasks.filter(t=>t.due===d&&!t.done);const full=Math.min(100,(evs.length+ts.length)*14);return `<div class="weekcol"><b>${fmt(d)}</b><div class="bar" style="margin:8px 0"><i style="width:${full}%"></i></div>${evs.map(e=>`<p>⏰ ${fmtTime(e.start)} ${esc(e.title)}</p>`).join('')}${ts.map(t=>`<p>☐ ${esc(t.title)}</p>`).join('')||''}<button class="ghost small" onclick="addEventPrompt('${d}')">+ Add</button></div>`}).join('')}</div>
+ <div class="card"><h2>Focus list</h2>${top3.map(t=>`<p>☐ ${esc(t.title)} · ${t.dur} min</p>`).join('')||'<p class="hint">Pick three for today in Tasks.</p>'}</div>`;
+}
+let resetStep=0;
+function weeklyReset(){resetStep=0;showResetStep();}
+function showResetStep(){
+ const steps=[
+  ['Step 1 of 4 — Look back','What did not get done last week? Nothing is a failure. Pick what still matters and move it forward.'],
+  ['Step 2 of 4 — Pick your three','Choose up to three things that would make next week feel good. Small is good.'],
+  ['Step 3 of 4 — Plan the basics','Meals, bills and one home task for the week. The rest can wait.'],
+  ['Step 4 of 4 — Be kind about it','Rest days count. A half-done week still counts. You are ready for next week.']];
+ const [ttl,body]=steps[resetStep];
+ modal(`<h2>${ttl}</h2><p>${body}</p><div class="row">${resetStep>0?`<button class="ghost" onclick="resetStep--;showResetStep()">Back</button>`:''}${resetStep<3?`<button onclick="resetStep++;showResetStep()">Next step</button>`:`<button onclick="closeModal();toast('Weekly reset done. Nice and gentle.')">Done</button>`}</div>`);
+}
+function renderMonth(){
+ const base=new Date(T+'T12:00:00');base.setMonth(base.getMonth()+state.monthOffset);const y=base.getFullYear(),m=base.getMonth();
+ const first=new Date(y,m,1);const startDay=(first.getDay()+6)%7;const dim=new Date(y,m+1,0).getDate();
+ const sel=state.selMonthDay||T;
+ const cells=[];for(let i=0;i<startDay;i++)cells.push('');for(let d=1;d<=dim;d++)cells.push(y+'-'+pad(m+1)+'-'+pad(d));
+ const agendaE=state.events.filter(e=>e.date===sel);const agendaT=state.tasks.filter(t=>t.due===sel);
+ $('#view-month').innerHTML=`<h1>Month</h1><div class="row"><button class="ghost" onclick="state.monthOffset--;renderAll()">‹ Prev</button><h2 style="flex:1;text-align:center">${base.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</h2><button class="ghost" onclick="state.monthOffset++;renderAll()">Next ›</button></div>
+ <div class="monthgrid">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<b style="text-align:center">${d}</b>`).join('')}${cells.map(d=>{if(!d)return '<div></div>';const evs=state.events.filter(e=>e.date===d);const ts=state.tasks.filter(t=>t.due===d&&!t.done);const items=[...evs.map(e=>`<div class="ev ${AREA_TINT[e.area]}" style="font-size:.8em;padding:2px 6px">${esc(e.title)}</div>`),...ts.map(t=>`<div class="ev" style="font-size:.8em;padding:2px 6px;background:var(--bg)">☐ ${esc(t.title)}</div>`)];const shown=items.slice(0,2);const more=items.length-2;return `<div class="mday ${d===T?'today':''}" onclick="state.selMonthDay='${d}';renderAll()"><b>${Number(d.slice(-2))}</b>${shown.join('')}${more>0?`<div class="hint">+${more} more</div>`:''}</div>`}).join('')}</div>
+ <div class="card"><h2>${fmt(sel)}</h2>${agendaE.map(e=>`<p>⏰ ${fmtTime(e.start)} — ${esc(e.title)}</p>`).join('')}${agendaT.map(t=>`<p>☐ ${esc(t.title)}</p>`).join('')||(!agendaE.length?'<p class="hint">A quiet day. Add something small if you like.</p>':'')}<div class="row"><button class="ghost" onclick="addEventPrompt('${sel}')">+ Event</button><button class="ghost" onclick="quickTaskForDay('${sel}')">+ Task</button></div></div>`;
+}
+function quickTaskForDay(d){const v=prompt('Task for '+fmt(d)+':');if(!v)return;state.tasks.push({id:uid(),title:v,area:'Home',due:d,dur:15,top:false,done:false,steps:[],tiny:'',later:false,from:''});save();renderAll();}
+function toggleHabit(id,day){const h=state.habits.find(x=>x.id===id);if(!h)return;if(h.log[day]==='done')delete h.log[day];else h.log[day]='done';save();renderAll();}
+function toggleHabitTiny(id,day){const h=state.habits.find(x=>x.id===id);if(!h)return;h.log[day]=h.log[day]==='tiny'?'': 'tiny';save();renderAll();}
+function habitMomentum(h){
+ let score=0,wsum=0;for(let w=0;w<4;w++){const wt=4-w;let done=0,poss=0;for(let d=0;d<7;d++){const dt=new Date(T+'T12:00:00');dt.setDate(dt.getDate()-(w*7+d));const ds=todayStr(dt);if(h.rest&&h.rest.includes(ds))continue;poss++;if(h.log[ds])done++;}if(poss){score+=wt*(done/poss);wsum+=wt;}}
+ return wsum?Math.round(score/wsum*100):0;}
+function weekDots(h){const out=[];const now=new Date(T+'T12:00:00');const dayIdx=now.getDay();const mon=new Date(now);mon.setDate(now.getDate()-((dayIdx+6)%7));
+ for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);const ds=todayStr(d);const v=h.log[ds];out.push(`<span title="${fmt(ds)}" style="display:inline-block;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;border:1px solid var(--line);background:${v==='done'?'var(--accent)':v==='tiny'?'var(--accent2)':'transparent'};color:${v?'#fff':'var(--ink)'};font-size:.8em">${v==='done'?'✓':v==='tiny'?'◐':'·'}</span>`);}
+ return out.join(' ');}
+function renderHabits(){
+ $('#view-habits').innerHTML=`<h1>Habits</h1><p class="hint">No streaks here. Momentum counts recent weeks more, and rest days never count against you. A tiny version still counts.</p>
+ <div class="grid">${state.habits.map(h=>{const mom=habitMomentum(h);const label=mom>=70?'Thriving':mom>=35?'Growing':'Just starting';return `<div class="card" style="margin:0"><div class="row"><span style="font-size:1.8em">🌱</span><div><b>${esc(h.name)}</b><p class="hint">Cue: ${esc(h.cue)} · Tiny: ${esc(h.tiny)}</p></div></div><div class="row" style="margin:10px 0">${ring(mom,90)}<div><b>${label}</b><p class="hint">${mom}% momentum (last 4 weeks)</p><button class="${h.log[T]==='done'?'ghost':'small'}" onclick="toggleHabit('${h.id}','${T}')">${h.log[T]==='done'?'✓ Done today':'Mark today done'}</button> <button class="ghost small" onclick="toggleHabitTiny('${h.id}','${T}')">Tiny version</button></div></div><div>${weekDots(h)}</div></div>`}).join('')}</div>
+ <div class="card"><div class="row"><input id="habitAdd" placeholder="New habit name…"><button onclick="addHabit()">Add habit</button></div></div>`;
+}
+function addHabit(){const v=$('#habitAdd').value.trim();if(!v)return;state.habits.push({id:uid(),name:v,cue:'Pick a cue',tiny:'Tiny version',log:{},rest:[]});save();renderAll();}
+function renderRoutines(){
+ $('#view-routines').innerHTML=`<h1>Routines</h1><p class="hint">A routine plays one step at a time. No rushing. A short version is always available.</p>
+ <div class="grid">${state.routines.map(r=>{const total=r.steps.reduce((s,x)=>s+x[1],0);return `<div class="card" style="margin:0"><b>${esc(r.name)}</b><p class="hint">${esc(r.when)} · ${r.steps.length} steps · ${total} min · short: ${r.short} min</p><ol>${r.steps.map(s=>`<li>${esc(s[0])} <span class="hint">(${s[1]} min)</span></li>`).join('')}</ol><button onclick="playRoutine('${r.id}',false)">▶ Play</button> <button class="ghost" onclick="playRoutine('${r.id}',true)">Short version</button></div>`}).join('')}</div>
+ <div class="card"><h2>Starter routines to borrow</h2><p>Room reset (10 min): pick up loose items, wipe one surface, open a window. · Lunch tidy (5 min): clear the table, wash the plate, wipe the counter.</p><button class="ghost" onclick="addStarterRoutine()">Add room reset routine</button></div>`;
+}
+function addStarterRoutine(){state.routines.push({id:uid(),name:'Room reset',when:'Whenever you need it',steps:[['Pick up loose items',4],['Wipe one surface',3],['Open a window',1]],short:5});save();renderAll();toast('Room reset added.');}
+function playRoutine(id,short){const r=state.routines.find(x=>x.id===id);if(!r)return;const steps=short?r.steps.slice(0,2):r.steps;window._ri=0;
+ const show=()=>{if(window._ri>=steps.length){modal(`<h2>Routine complete</h2><p>Well done. ${esc(r.name)} is finished — even the short version counts fully.</p><button onclick="closeModal()">Nice</button>`);return}
+  modal(`<h2>${esc(r.name)}</h2><p class="hint">Step ${window._ri+1} of ${steps.length}</p><p style="font-size:1.3em"><b>${esc(steps[window._ri][0])}</b> · ${steps[window._ri][1]} min</p><div class="row"><button onclick="window._ri++;window._showRoutineStep()">Next step</button><button class="ghost" onclick="closeModal()">Stop here</button></div>`);};
+ window._showRoutineStep=show;show();}
+function renderGoals(){
+ const tab=state.goalTab||'In progress';const list=state.goals.filter(g=>(tab==='In progress')?!g.done:g.done);
+ $('#view-goals').innerHTML=`<h1>Goals &amp; projects</h1><div class="row pilltabs"><button class="${tab==='In progress'?'on':''}" onclick="state.goalTab='In progress';renderAll()">In progress</button><button class="${tab==='Finished'?'on':''}" onclick="state.goalTab='Finished';renderAll()">Finished</button></div>
+ <div class="grid">${list.map(g=>`<div class="card" style="margin:0;cursor:pointer" onclick="goalDetail('${g.id}')"><div class="row">${ring(g.pct,90)}<div><span class="chip">${g.type}</span> <span class="chip">By ${fmt(g.due)}</span><h3>${esc(g.title)}</h3><p class="hint">Next: ${esc(g.next)}</p></div></div></div>`).join('')||'<p class="hint">Nothing here yet.</p>'}</div>
+ <div class="card"><div class="row"><input id="goalAdd" placeholder="New goal or project…"><button onclick="addGoal()">Add</button></div></div>`;
+}
+function addGoal(){const v=$('#goalAdd').value.trim();if(!v)return;state.goals.push({id:uid(),type:'Goal',title:v,due:addDays(T,30),pct:0,next:'First small step',done:false});save();renderAll();}
+function goalDetail(id){const g=state.goals.find(x=>x.id===id);if(!g)return;modal(`<h2>${esc(g.title)}</h2><p><span class="chip">${g.type}</span> <span class="chip">By ${fmt(g.due)}</span></p><div class="row">${ring(g.pct,110)}<div><label>Progress %</label><input type="range" min="0" max="100" value="${g.pct}" onchange="setGoalPct('${id}',this.value)"><p class="hint">Next: ${esc(g.next)}</p></div></div><label>Next action</label><input id="goalNext" value="${esc(g.next)}"><div class="row" style="margin-top:10px"><button onclick="saveGoalNext('${id}')">Save</button><button class="ghost" onclick="finishGoal('${id}')">${g.done?'Reopen':'Mark finished'}</button><button class="ghost" onclick="closeModal()">Close</button></div>`);}
+function setGoalPct(id,v){const g=state.goals.find(x=>x.id===id);g.pct=Number(v);save();renderAll();}
+function saveGoalNext(id){const g=state.goals.find(x=>x.id===id);g.next=$('#goalNext').value.trim()||g.next;save();closeModal();renderAll();}
+function finishGoal(id){const g=state.goals.find(x=>x.id===id);g.done=!g.done;if(g.done)g.pct=100;save();closeModal();renderAll();}
+function renderUpcoming(){
+ const days=state.showFurther?30:14;const groups={};
+ state.events.filter(e=>e.date>=T&&e.date<=addDays(T,days)).forEach(e=>{(groups[e.date]=groups[e.date]||[]).push(e)});
+ state.tasks.filter(t=>t.due&&t.due>=T&&t.due<=addDays(T,days)&&!t.done).forEach(t=>{(groups[t.due]=groups[t.due]||[]).push(t)});
+ $('#view-upcoming').innerHTML=`<h1>Upcoming</h1><div class="row"><button class="ghost" onclick="state.showFurther=!state.showFurther;renderAll()">${state.showFurther?'Show less':'Show further ahead'}</button><button class="ghost" onclick="addReminder()">+ Reminder</button></div>
+ ${Object.keys(groups).sort().map(d=>`<div class="card"><h2>${fmt(d)}</h2>${groups[d].map(x=>x.start!==undefined?`<p>⏰ ${fmtTime(x.start)} — ${esc(x.title)} <span class="chip ${AREA_TINT[x.area]}">${x.area}</span></p>`:`<p>☐ ${esc(x.title)} <span class="chip">deadline</span></p>`).join('')}</div>`).join('')||'<p class="hint">Nothing coming up in the next two weeks.</p>'}`;
+}
+function addReminder(){const v=prompt('Reminder text:');if(!v)return;state.events.push({id:uid(),title:v,date:TOM,start:9*60,dur:15,area:'Home'});save();renderAll();toast('Reminder set for tomorrow.');}
+function renderNotes(){
+ const q=(state.noteQ||'').toLowerCase();const list=state.notes.filter(n=>!q||n.title.toLowerCase().includes(q)||n.body.toLowerCase().includes(q)).sort((a,b)=>b.pinned-a.pinned);
+ $('#view-notes').innerHTML=`<h1>Notes</h1><div class="row"><input id="noteQ" placeholder="Search notes…" value="${esc(state.noteQ||'')}" oninput="state.noteQ=this.value"><button onclick="renderAll()">Search</button><button onclick="newNote()">+ New note</button></div>
+ <div class="grid">${list.map(n=>`<div class="card" style="margin:14px 0;background:${n.pinned?'var(--amber)':'var(--card)'};cursor:pointer" onclick="editNote('${n.id}')"><b>${n.pinned?'📌 ':''}${esc(n.title)}</b><p style="white-space:pre-wrap">${esc(n.body)}</p><p class="hint">${fmt(n.date)}</p></div>`).join('')||'<p class="hint">No notes yet.</p>'}</div>`;
+}
+function newNote(){const t=prompt('Note title:');if(!t)return;state.notes.push({id:uid(),title:t,body:'',date:T,pinned:false});save();renderAll();}
+function editNote(id){const n=state.notes.find(x=>x.id===id);if(!n)return;modal(`<h2>Edit note</h2><label>Title</label><input id="noteTitle" value="${esc(n.title)}"><label>Body</label><textarea id="noteBody" rows="6">${esc(n.body)}</textarea><div class="row" style="margin-top:10px"><button onclick="saveNote('${id}')">Save</button><button class="ghost" onclick="pinNote('${id}')">${n.pinned?'Unpin':'Pin'}</button><button class="ghost" onclick="delNote('${id}')">Delete</button></div>`);}
+function saveNote(id){const n=state.notes.find(x=>x.id===id);n.title=$('#noteTitle').value.trim()||n.title;n.body=$('#noteBody').value;save();closeModal();renderAll();}
+function pinNote(id){const n=state.notes.find(x=>x.id===id);n.pinned=!n.pinned;save();closeModal();renderAll();}
+function delNote(id){state.notes=state.notes.filter(x=>x.id!==id);save();closeModal();renderAll();}
+function renderProgress(){
+ const monthStart=T.slice(0,7);const showed=new Set(state.checkins.filter(c=>c.date.startsWith(monthStart)).map(c=>c.date)).size;
+ const wins=state.tasks.filter(t=>t.done).length+state.checkins.filter(c=>c.win).length;
+ const weekTasks=state.tasks.filter(t=>t.done).length;const weekHabits=Object.values(state.habits).reduce((s,h)=>s+Object.values(h.log).filter(v=>v).length,0);
+ const days=[...Array(14)].map((_,i)=>addDays(T,-(13-i)));
+ const donePerDay=days.map(d=>state.tasks.filter(t=>t.done&&t.due===d).length);
+ const maxDone=Math.max(1,...donePerDay);
+ const byDay={};state.checkins.filter(c=>c.battery).forEach(c=>{const d=new Date(c.date+'T12:00:00');const wd=d.toLocaleDateString(undefined,{weekday:'long'});(byDay[wd]=byDay[wd]||[]).push(['Empty','Low','Okay','Good','Full'].indexOf(c.battery)+1);});
+ let bestDay='—',bestAvg=0;for(const k in byDay){const a=byDay[k].reduce((s,v)=>s+v,0)/byDay[k].length;if(a>bestAvg){bestAvg=a;bestDay=k;}}
+ const insight=bestAvg?`Your energy tends to be highest on ${bestDay}. That can be a good day for the harder thing.`:'Check in for a few days and this space will show your energy pattern.';
+ $('#view-progress').innerHTML=`<h1>Progress</h1><p class="hint">Progress here is gentle: showing up counts, even on small days.</p>
+ <div class="grid">
+ <div class="card" style="margin:0"><h2>Showed up</h2><p style="font-size:2em">${showed}</p><p class="hint">days active this month</p></div>
+ <div class="card" style="margin:0"><h2>Wins jar</h2><p style="font-size:2em">${wins}</p><p class="hint">tasks and wins completed in total</p></div>
+ <div class="card" style="margin:0"><h2>This week</h2><p>${weekTasks} tasks done · ${weekHabits} habit marks</p></div>
+ <div class="card" style="margin:0"><h2>Focus</h2><p style="font-size:2em">${state.focusMinutes}</p><p class="hint">minutes focused in total</p></div></div>
+ <div class="card"><h2>Done each day (last 14 days)</h2><canvas id="barChart" width="900" height="220" style="width:100%"></canvas></div>
+ <div class="card"><h2>Brain weather vs battery</h2><div class="row pilltabs"><button class="${(state.chartRange||14)===14?'on':''}" onclick="state.chartRange=14;renderAll()">2 weeks</button><button class="${state.chartRange===30?'on':''}" onclick="state.chartRange=30;renderAll()">30 days</button></div><canvas id="lineChart" width="900" height="220" style="width:100%"></canvas><p class="hint">${insight}</p></div>
+ <div class="card"><h2>Habit momentum</h2><div class="row">${state.habits.map(h=>`<div style="text-align:center">${ring(habitMomentum(h),90)}<p>${esc(h.name)}</p></div>`).join('')}</div></div>
+ <div class="card"><h2>Time check</h2><p>On average, tasks here take about <b>1.4×</b> the guessed time — roughly 44% longer. That is normal, not a personal failing.</p><p class="hint">Planning buffer: ${state.settings.buffer?'ON — durations are shown with 50% extra time.':'OFF — turn it on in Settings or Schedule.'}</p></div>`;
+ drawBar(donePerDay,maxDone);drawLine(state.chartRange||14);
+}
+function drawBar(vals,max){const cv=$('#barChart');if(!cv)return;const ctx=cv.getContext('2d');ctx.clearRect(0,0,900,220);vals.forEach((v,i)=>{const h=v/max*150;ctx.fillStyle='#C05B2E';ctx.fillRect(20+i*62,190-h,36,h);ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--mut').trim();ctx.font='14px sans-serif';ctx.fillText(v,30+i*62,205);});}
+function drawLine(range){const cv=$('#lineChart');if(!cv)return;const ctx=cv.getContext('2d');ctx.clearRect(0,0,900,220);const days=[...Array(range)].map((_,i)=>addDays(T,-(range-1-i)));
+ const wmap={'Stormy':1,'Cloudy':2,'Okay':3,'Bright':4,'Sunny':5};const bmap={'Empty':1,'Low':2,'Okay':3,'Good':4,'Full':5};
+ const wpts=days.map(d=>{const c=state.checkins.find(x=>x.date===d);return c&&c.weather?wmap[c.weather]||3:null});
+ const bpts=days.map(d=>{const c=state.checkins.find(x=>x.date===d);return c&&c.battery?bmap[c.battery]||3:null});
+ const plot=(pts,color)=>{ctx.strokeStyle=color;ctx.lineWidth=3;ctx.beginPath();let started=false;pts.forEach((v,i)=>{if(v==null)return;const x=20+i*(860/Math.max(1,range-1));const y=190-(v-1)*38;if(!started){ctx.moveTo(x,y);started=true}else ctx.lineTo(x,y);});ctx.stroke();};
+ plot(wpts,'#C05B2E');plot(bpts,'#2E7D6B');ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--mut').trim();ctx.font='14px sans-serif';ctx.fillText('— mood (rust)',20,20);ctx.fillText('— battery (green)',170,20);}
+function renderMoney(){
+ const m=state.money;const payday=new Date(m.payday+'T12:00:00');const now=new Date(T+'T12:00:00');let days=Math.max(1,Math.ceil((payday-now)/86400000));
+ const unpaidBills=m.bills.filter(b=>!b.paid&&b.due<=m.payday).reduce((s,b)=>s+b.amount,0);
+ const minDebt=m.debts.reduce((s,d)=>s+d.min,0);
+ const sts=Math.max(0,(m.balance-unpaidBills-minDebt-m.savings)/days);
+ const debtSorted=[...m.debts].sort((a,b)=>state.money.debtMode==='Snowball'?a.balance-b.balance:b.apr-a.apr);
+ const debtFree=debtFreeDate();
+ $('#view-money').innerHTML=`<h1>Money</h1><p class="hint">Money here is calm and simple: what is safe to spend today, what is due, and when debts can be finished. No bank connection, no account.</p>
+ <div class="card"><h2>Safe to spend today</h2><p style="font-size:2.4em;font-family:Georgia,serif">$${sts.toFixed(2)}</p><p class="hint">($${m.balance} balance − $${unpaidBills} bills due before payday − $${minDebt} minimum debt payments − $${m.savings} savings) ÷ ${days} days to payday. Never below zero.</p>
+ <div class="row"><label>Balance $ <input id="mBal" type="number" value="${m.balance}"></label><label>Payday <input id="mPay" type="date" value="${m.payday}"></label><label>Savings to set aside $ <input id="mSav" type="number" value="${m.savings}"></label><button onclick="saveMoneyHead()">Save</button></div></div>
+ <div class="card"><h2>Bills</h2>${m.bills.map(b=>`<div class="taskrow"><span style="flex:1">${esc(b.name)} — $${b.amount} · due ${fmt(b.due)} ${b.paid?'<span class="ok">✓ Paid</span>':''}</span><button class="ghost small" onclick="toggleBill('${b.id}')">${b.paid?'Undo paid':'Mark paid'}</button><button class="ghost small" onclick="delBill('${b.id}')">Delete</button></div>`).join('')||'<p class="hint">No bills yet.</p>'}
+ <div class="row" style="margin-top:10px"><input id="billName" placeholder="Bill name"><input id="billAmt" type="number" placeholder="Amount"><input id="billDue" type="date" value="${TOM}"><button onclick="addBill()">Add bill</button></div></div>
+ <div class="card"><h2>Spending log</h2>${m.spending.map(s=>`<p>${esc(s.what)} — $${s.amount} · ${fmt(s.date)}</p>`).join('')||'<p class="hint">Nothing logged yet.</p>'}<div class="row"><input id="spWhat" placeholder="What did you spend on?"><input id="spAmt" type="number" placeholder="Amount"><button onclick="addSpending()">Log spending</button></div></div>
+ <div class="card"><h2>Savings pots</h2><div class="grid">${m.pots.map(p=>{const pct=p.target?Math.min(100,p.saved/p.target*100):0;return `<div style="text-align:center">${ring(pct,100)}<p><b>${esc(p.name)}</b><br>$${p.saved} of $${p.target}</p><div class="row" style="justify-content:center"><input id="potAdd_${p.id}" type="number" placeholder="Add $" style="width:110px"><button class="small" onclick="addToPot('${p.id}')">Add</button></div></div>`}).join('')}</div></div>
+ <div class="card"><h2>Debt payoff</h2><div class="row pilltabs"><button class="${m.debtMode==='Snowball'?'on':''}" onclick="state.money.debtMode='Snowball';save();renderAll()">Snowball (smallest first)</button><button class="${m.debtMode==='Avalanche'?'on':''}" onclick="state.money.debtMode='Avalanche';save();renderAll()">Avalanche (highest APR first)</button></div>
+ <p class="hint">Payoff order: ${debtSorted.map(d=>esc(d.name)).join(' → ')||'no debts listed'}</p>
+ <p><b>Debt-free by: ${debtFree}</b> with $${m.extra} extra per month.</p><label>Extra per month $ <input id="extraIn" type="range" min="0" max="500" value="${m.extra}" oninput="state.money.extra=Number(this.value);save();renderAll()"></label>
+ ${m.debts.map(d=>`<div class="taskrow"><span style="flex:1">${esc(d.name)} — $${d.balance} · ${d.apr}% APR · min $${d.min}/mo</span><button class="ghost small" onclick="delDebt('${d.id}')">Delete</button></div>`).join('')}
+ <div class="row" style="margin-top:10px"><input id="debtName" placeholder="Debt name"><input id="debtBal" type="number" placeholder="Balance"><input id="debtApr" type="number" placeholder="APR %"><input id="debtMin" type="number" placeholder="Min / mo"><button onclick="addDebt()">Add debt</button></div>
+ <p class="hint">Simulator maths: monthly interest = balance × APR ÷ 1200. Minimums are paid first, then the extra payment goes to the first debt in the order above, and rolls to the next when one is cleared.</p></div>`;
+}
+function saveMoneyHead(){state.money.balance=Number($('#mBal').value)||0;state.money.payday=$('#mPay').value||state.money.payday;state.money.savings=Number($('#mSav').value)||0;save();renderAll();}
+function toggleBill(id){const b=state.money.bills.find(x=>x.id===id);b.paid=!b.paid;save();renderAll();}
+function delBill(id){state.money.bills=state.money.bills.filter(x=>x.id!==id);save();renderAll();}
+function addBill(){const n=$('#billName').value.trim(),a=Number($('#billAmt').value),d=$('#billDue').value;if(!n||!a)return;state.money.bills.push({id:uid(),name:n,amount:a,due:d||TOM,paid:false});save();renderAll();}
+function addSpending(){const w=$('#spWhat').value.trim(),a=Number($('#spAmt').value);if(!w||!a)return;state.money.spending.push({id:uid(),what:w,amount:a,date:T});save();renderAll();}
+function addToPot(id){const p=state.money.pots.find(x=>x.id===id);const v=Number($('#potAdd_'+id).value)||0;p.saved+=v;save();renderAll();}
+function addDebt(){const n=$('#debtName').value.trim(),b=Number($('#debtBal').value),a=Number($('#debtApr').value),mn=Number($('#debtMin').value);if(!n||!b)return;state.money.debts.push({id:uid(),name:n,balance:b,apr:a||0,min:mn||0});save();renderAll();}
+function delDebt(id){state.money.debts=state.money.debts.filter(x=>x.id!==id);save();renderAll();}
+function debtFreeDate(){const ds=[...state.money.debts].map(d=>({...d}));if(!ds.length)return 'no debts listed';const sorted=ds.sort((a,b)=>state.money.debtMode==='Snowball'?a.balance-b.balance:b.apr-a.apr);let months=0;const extra=state.money.extra||0;
+ while(sorted.some(d=>d.balance>0)&&months<600){months++;sorted.forEach(d=>{if(d.balance>0)d.balance+=d.balance*d.apr/1200});let mins=0;sorted.forEach(d=>{if(d.balance>0){const pay=Math.min(d.balance,d.min);d.balance-=pay;mins+=pay;}});let e=extra;for(const d of sorted){if(e<=0)break;if(d.balance>0){const pay=Math.min(d.balance,e);d.balance-=pay;e-=pay;}}}
+ if(months>=600)return 'more than 50 years at current payments — try a larger extra amount';
+ const dt=new Date(T+'T12:00:00');dt.setMonth(dt.getMonth()+months);return dt.toLocaleDateString(undefined,{month:'long',year:'numeric'})+' ('+months+' months)';}
+const MEAL_ING={ 'Pasta':['Pasta','Tomato sauce','Cheese'], 'Rice and beans':['Rice','Beans','Onions'], 'Omelette':['Eggs','Bread','Butter'], 'Salad bowl':['Lettuce','Tomatoes','Cucumber'], 'Soup':['Vegetables','Stock','Bread'], 'Stir fry':['Rice','Mixed vegetables','Soy sauce'], 'Sandwich':['Bread','Cheese','Lettuce'] };
+function renderMeals(){
+ const days=[...Array(7)].map((_,i)=>addDays(T,i));const slots=['Breakfast','Lunch','Dinner'];
+ $('#view-meals').innerHTML=`<h1>Meals &amp; groceries</h1><p class="hint">Plan a meal and its usual ingredients join the grocery list on their own. Tick items off as you shop.</p>
+ <div class="card">${days.map(d=>`<h3>${fmt(d)}</h3><div class="row">${slots.map(s=>{const key=d+'|'+s;const val=(state.meals[key]||'');return `<label style="flex:1;min-width:200px">${s}<select onchange="setMeal('${key}',this.value)"><option value="">— no plan —</option>${Object.keys(MEAL_ING).map(m=>`<option ${val===m?'selected':''}>${m}</option>`).join('')}<option value="__custom" ${val&&!MEAL_ING[val]?'selected':''}>Custom…</option></select>${val?`<span class="chip">${esc(val)}</span>`:''}</label>`}).join('')}</div>`).join('')}</div>
+ <div class="card"><h2>Grocery list</h2>${state.grocery.map(g=>`<label style="display:block"><input type="checkbox" ${g.done?'checked':''} onchange="toggleGrocery('${g.id}')"> ${esc(g.item)}</label>`).join('')||'<p class="hint">Nothing on the list yet.</p>'}
+ <div class="row" style="margin-top:10px"><input id="grocAdd" placeholder="Add an item…"><button onclick="addGrocery()">Add</button><button class="ghost" onclick="rebuildGrocery()">Rebuild from meals</button></div></div>`;
+}
+function setMeal(key,val){if(val==='__custom'){const c=prompt('Meal name:');if(!c){renderAll();return}val=c;}if(val)state.meals[key]=val;else delete state.meals[key];rebuildGrocery(false);save();renderAll();}
+function rebuildGrocery(silent){const have=new Set(state.grocery.map(g=>g.item));Object.values(state.meals).forEach(m=>{(MEAL_ING[m]||[]).forEach(ing=>{if(!have.has(ing)){state.grocery.push({id:uid(),item:ing,done:false});have.add(ing);}});});save();if(!silent)renderAll();else renderAll();}
+function toggleGrocery(id){const g=state.grocery.find(x=>x.id===id);g.done=!g.done;save();renderAll();}
+function addGrocery(){const v=$('#grocAdd').value.trim();if(!v)return;state.grocery.push({id:uid(),item:v,done:false});save();renderAll();}
+function renderHome(){
+ $('#view-home').innerHTML=`<h1>Home</h1>
+ <div class="card"><h2>Chores</h2>${state.chores.map(c=>`<div class="taskrow"><input type="checkbox" ${c.done?'checked':''} onchange="toggleChore('${c.id}')"><span style="flex:1">${esc(c.name)} <span class="chip">${esc(c.repeat)}</span></span></div>`).join('')||'<p class="hint">No chores yet.</p>'}<div class="row"><input id="choreAdd" placeholder="New chore…"><input id="choreRep" placeholder="Repeat (e.g. Weekly)" style="max-width:200px"><button onclick="addChore()">Add chore</button></div></div>
+ <div class="card"><h2>Maintenance log</h2>${state.maintenance.map(m=>`<p>🔧 ${esc(m.what)} · ${fmt(m.date)}</p>`).join('')}<div class="row"><input id="maintAdd" placeholder="What was fixed or checked?"><button onclick="addMaint()">Log it</button></div></div>
+ <div class="card"><h2>Household inventory</h2>${state.inventory.map(i=>`<p>📦 ${esc(i.item)} × ${i.qty}</p>`).join('')}<div class="row"><input id="invAdd" placeholder="Item"><input id="invQty" type="number" value="1" style="max-width:100px"><button onclick="addInv()">Add</button></div></div>
+ <div class="card"><h2>Emergency contacts</h2>${state.contacts.map(c=>`<p>📞 <b>${esc(c.name)}</b> — ${esc(c.phone)} <span class="hint">${esc(c.note)}</span></p>`).join('')}<div class="row"><input id="ctName" placeholder="Name"><input id="ctPhone" placeholder="Phone"><input id="ctNote" placeholder="Note"><button onclick="addContact()">Add contact</button></div></div>`;
+}
+function toggleChore(id){const c=state.chores.find(x=>x.id===id);c.done=!c.done;save();renderAll();}
+function addChore(){const v=$('#choreAdd').value.trim();if(!v)return;state.chores.push({id:uid(),name:v,repeat:$('#choreRep').value.trim()||'Weekly',done:false});save();renderAll();}
+function addMaint(){const v=$('#maintAdd').value.trim();if(!v)return;state.maintenance.push({id:uid(),what:v,date:T});save();renderAll();}
+function addInv(){const v=$('#invAdd').value.trim();if(!v)return;state.inventory.push({id:uid(),item:v,qty:Number($('#invQty').value)||1});save();renderAll();}
+function addContact(){const n=$('#ctName').value.trim();if(!n)return;state.contacts.push({id:uid(),name:n,phone:$('#ctPhone').value.trim(),note:$('#ctNote').value.trim()});save();renderAll();}
+function renderWork(){
+ $('#view-work').innerHTML=`<h1>Work &amp; study</h1>
+ <div class="card"><h2>Assignments</h2>${state.assignments.map(a=>`<div class="taskrow"><input type="checkbox" ${a.done?'checked':''} onchange="toggleAssign('${a.id}')"><span style="flex:1">${esc(a.title)} <span class="chip">due ${fmt(a.due)}</span></span></div>`).join('')||'<p class="hint">No assignments.</p>'}<div class="row"><input id="asAdd" placeholder="Assignment…"><input id="asDue" type="date" value="${TOM}"><button onclick="addAssign()">Add</button></div></div>
+ <div class="card"><h2>Classes timetable</h2>${state.classes.map(c=>`<p>📚 ${esc(c.time)} — ${esc(c.name)}</p>`).join('')}<div class="row"><input id="clTime" placeholder="e.g. Mon 9:00 AM"><input id="clName" placeholder="Class name"><button onclick="addClass()">Add class</button></div></div>
+ <div class="card"><h2>Exams</h2>${state.exams.map(e=>`<p>📝 ${esc(e.name)} · ${fmt(e.date)}</p>`).join('')}<div class="row"><input id="exName" placeholder="Exam"><input id="exDate" type="date" value="${TOM}"><button onclick="addExam()">Add exam</button></div></div>
+ <div class="card"><h2>Grades</h2>${state.grades.map(g=>`<p>${esc(g.subject)}: <b>${esc(g.grade)}</b></p>`).join('')}<div class="row"><input id="grSub" placeholder="Subject"><input id="grVal" placeholder="Grade"><button onclick="addGrade()">Add grade</button></div></div>
+ <div class="card"><h2>Quick notes</h2>${state.workNotes.map(n=>`<p>📝 ${esc(n.text)}</p>`).join('')}<div class="row"><input id="wnAdd" placeholder="A quick work or study note…"><button onclick="addWorkNote()">Add note</button></div></div>`;
+}
+function toggleAssign(id){const a=state.assignments.find(x=>x.id===id);a.done=!a.done;save();renderAll();}
+function addAssign(){const v=$('#asAdd').value.trim();if(!v)return;state.assignments.push({id:uid(),title:v,due:$('#asDue').value||TOM,done:false});save();renderAll();}
+function addClass(){const t=$('#clTime').value.trim(),n=$('#clName').value.trim();if(!n)return;state.classes.push({id:uid(),time:t||'—',name:n});save();renderAll();}
+function addExam(){const n=$('#exName').value.trim();if(!n)return;state.exams.push({id:uid(),name:n,date:$('#exDate').value||TOM});save();renderAll();}
+function addGrade(){const s=$('#grSub').value.trim(),g=$('#grVal').value.trim();if(!s||!g)return;state.grades.push({id:uid(),subject:s,grade:g});save();renderAll();}
+function addWorkNote(){const v=$('#wnAdd').value.trim();if(!v)return;state.workNotes.push({id:uid(),text:v});save();renderAll();}
+function renderWellness(){
+ const w=state.wellness;const waterToday=w.water.date===T?w.water.glasses:0;
+ const weights=w.weight.map(x=>x.unit==='lbs'&&w.unit==='kg'?Math.round(x.kg*2.20462):x.unit==='kg'&&w.unit==='lbs'?Math.round(x.kg/2.20462*10)/10:x.kg);
+ const latest=w.weight.length?w.weight[w.weight.length-1]:null;const hM=(w.heightCm||170)/100;const bmi=latest?Math.round(latest.kg/(hM*hM)*10)/10:'—';
+ $('#view-wellness').innerHTML=`<h1>Wellness</h1>
+ <div class="card"><h2>Sleep</h2>${w.sleep.slice(-7).map(s=>`<p>😴 ${fmt(s.date)}: ${s.hours} hours</p>`).join('')}<div class="row"><input id="slHours" type="number" step="0.5" placeholder="Hours slept"><button onclick="addSleep()">Log sleep</button></div></div>
+ <div class="card"><h2>Movement</h2>${w.movement.slice(-7).map(s=>`<p>🏃 ${fmt(s.date)}: ${esc(s.what)}</p>`).join('')}<div class="row"><input id="mvAdd" placeholder="What movement? (e.g. Walk 20 min)"><button onclick="addMovement()">Log movement</button></div></div>
+ <div class="card"><h2>Meds</h2>${w.meds.map(m=>`<div class="taskrow"><input type="checkbox" ${m.taken?'checked':''} onchange="toggleMed('${m.id}')"><span style="flex:1">${esc(m.name)}</span></div>`).join('')}<div class="row"><input id="medAdd" placeholder="Medicine or supplement"><button onclick="addMed()">Add med</button></div></div>
+ <div class="card"><h2>Water</h2><p style="font-size:2em">💧 ${waterToday} glasses today</p><div class="row"><button onclick="chgWater(1)">+ 1 glass</button><button class="ghost" onclick="chgWater(-1)">− 1</button></div></div>
+ <div class="card"><h2>Weight</h2><p>BMI (latest): <b>${bmi}</b> · Height: ${w.heightCm} cm</p><div class="row pilltabs"><button class="${w.unit==='kg'?'on':''}" onclick="state.wellness.unit='kg';save();renderAll()">kg</button><button class="${w.unit==='lbs'?'on':''}" onclick="state.wellness.unit='lbs';save();renderAll()">lbs</button></div>
+ ${w.weight.slice(-7).map(x=>`<p>⚖ ${fmt(x.date)}: ${x.unit==='kg'&&w.unit==='lbs'?Math.round(x.kg*2.20462):x.unit==='lbs'&&w.unit==='kg'?Math.round(x.kg/2.20462*10)/10:x.kg} ${w.unit}</p>`).join('')}
+ <div class="row"><input id="wtAdd" type="number" step="0.1" placeholder="Weight in ${w.unit}"><input id="htAdd" type="number" placeholder="Height cm" value="${w.heightCm}" style="max-width:140px"><button onclick="addWeight()">Log weight</button></div></div>`;
+}
+function addSleep(){const v=Number($('#slHours').value);if(!v)return;state.wellness.sleep.push({date:T,hours:v});save();renderAll();}
+function addMovement(){const v=$('#mvAdd').value.trim();if(!v)return;state.wellness.movement.push({date:T,what:v});save();renderAll();}
+function toggleMed(id){const m=state.wellness.meds.find(x=>x.id===id);m.taken=!m.taken;save();renderAll();}
+function addMed(){const v=$('#medAdd').value.trim();if(!v)return;state.wellness.meds.push({id:uid(),name:v,taken:false});save();renderAll();}
+function chgWater(n){if(state.wellness.water.date!==T)state.wellness.water={date:T,glasses:0};state.wellness.water.glasses=Math.max(0,state.wellness.water.glasses+n);save();renderAll();}
+function addWeight(){const v=Number($('#wtAdd').value);if(!v)return;const h=Number($('#htAdd').value);if(h)state.wellness.heightCm=h;const kg=state.wellness.unit==='lbs'?v/2.20462:v;state.wellness.weight.push({date:T,kg:Math.round(kg*10)/10,unit:'kg'});save();renderAll();}
+function renderSettings(){
+ const s=state.settings;const swatches=['Terracotta','#C05B2E','Forest','#2E7D6B','Ocean','#3A6EA5','Plum','#7A5C9E','Berry','#B03A5B','Ochre','#8A6D1B'];
+ $('#view-settings').innerHTML=`<h1>Settings</h1>
+ <div class="card"><h2>Planner</h2><label>Your name</label><input id="setName" value="${esc(s.name)}">
+ <label>Week starts on</label><select id="setWeek"><option ${s.weekStart==='Mon'?'selected':''}>Mon</option><option ${s.weekStart==='Sun'?'selected':''}>Sun</option></select>
+ <label>Day start / end</label><div class="row"><input id="setStart" type="number" min="0" max="23" value="${s.dayStart}"><input id="setEnd" type="number" min="1" max="23" value="${s.dayEnd}"></div>
+ <label>Time format</label><select id="setTF"><option value="12" ${s.timeFormat==='12'?'selected':''}>12-hour</option><option value="24" ${s.timeFormat==='24'?'selected':''}>24-hour</option></select>
+ <button style="margin-top:10px" onclick="saveSettings()">Save planner settings</button></div>
+ <div class="card"><h2>Look</h2><p class="hint">Theme colour</p><div class="row">${[0,1,2,3,4,5].map(i=>`<button style="background:${['#C05B2E','#2E7D6B','#3A6EA5','#7A5C9E','#B03A5B','#8A6D1B'][i]};width:44px;height:44px;border-radius:50%;padding:0;border:${s.theme===i?'3px solid var(--ink)':'0'}" onclick="state.settings.theme=${i};save();applySettings();renderAll()" title="Theme ${i+1}"></button>`).join('')}</div>
+ <label><input type="checkbox" ${s.dark?'checked':''} onchange="state.settings.dark=this.checked;save();applySettings();renderAll()"> Dark mode</label><br>
+ <label><input type="checkbox" ${s.reduceMotion?'checked':''} onchange="state.settings.reduceMotion=this.checked;save()"> Reduce motion</label><br>
+ <label>Text size: ${s.textSize}px</label><input type="range" min="14" max="20" value="${s.textSize}" oninput="state.settings.textSize=Number(this.value);save();applySettings();renderAll()"></div>
+ <div class="card"><h2>Life areas</h2><p>${AREAS.map(a=>`<span class="chip ${AREA_TINT[a]}">${a}</span>`).join(' ')} <span class="hint">(areas are fixed in this version for colour coding)</span></p></div>
+ <div class="card"><h2>Your data</h2><p class="hint">Everything is kept only on this device, in your browser. There is no account and no cloud copy. Export a backup file to keep a copy yourself.</p>
+ <div class="row"><button onclick="exportJSON()">⬇ Export backup (JSON)</button><button class="ghost" onclick="exportCSV()">⬇ Export tasks (CSV)</button><button class="ghost" onclick="document.getElementById('importFile').click()">⬆ Import backup</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)"><button class="ghost" onclick="startFresh()">Start fresh</button></div></div>
+ <div class="card"><h2>Keyboard shortcuts</h2><p><b>N</b> — Quick add · <b>F</b> — Focus · <b>Esc</b> — close dialogs</p><p class="hint">SafeSpends Life Planner · one-time purchase product · no subscription · no login · no sync</p></div>`;
+}
+function saveSettings(){state.settings.name=$('#setName').value.trim()||'Sam';state.settings.weekStart=$('#setWeek').value;state.settings.dayStart=Number($('#setStart').value)||7;state.settings.dayEnd=Number($('#setEnd').value)||22;state.settings.timeFormat=$('#setTF').value;save();applySettings();renderAll();toast('Settings saved.');}
+function exportJSON(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='safespends-life-backup.json';a.click();}
+function exportCSV(){const rows=[['title','area','due','duration','done']].concat(state.tasks.map(t=>[t.title,t.area,t.due,t.dur,t.done]));const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='safespends-life-tasks.csv';a.click();}
+function importJSON(ev){const f=ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d&&d.tasks){state=d;save();applySettings();renderAll();toast('Backup imported.');}}catch(e){toast('That file could not be read.');}};rd.readAsText(f);}
+function startFresh(){if(!confirm('Start fresh? This erases everything on this device and loads a fresh example planner.'))return;if(!window.__DEMO__)localStorage.removeItem(LS);state=sample();save();applySettings();renderAll();toast('Fresh start done.');}
+function openCheckin(){
+ const ex=state.checkins.find(c=>c.date===T)||{weather:'',battery:'',chips:[],journal:''};
+ const weathers=[['☀️','Sunny'],['🌤','Bright'],['☁️','Cloudy'],['🌧','Rainy'],['⛈','Stormy']];
+ const batteries=[['🪫','Empty'],['🔋','Low'],['🔋','Okay'],['🔋','Good'],['🔋','Full']];
+ const chips=['Slept well','Took meds','Anxious','Focused','Headache','Calm','Tired','Energetic'];
+ $('#checkinBox').innerHTML=`<h2>Check in</h2><p class="hint">Two quick picks. Nothing else is required.</p>
+ <h3>Your weather</h3><div class="row">${weathers.map(([e,l])=>`<button class="${ex.weather===l?'':'ghost'} small" onclick="setCheck('weather','${l}')">${e} ${l}</button>`).join('')}</div>
+ <h3>Battery</h3><div class="row">${batteries.map(([e,l])=>`<button class="${ex.battery===l?'':'ghost'} small" onclick="setCheck('battery','${l}')">${e} ${l}</button>`).join('')}</div>
+ <h3>Anything else? (optional)</h3><div class="row">${chips.map(c=>`<button class="${ex.chips.includes(c)?'':'ghost'} small" onclick="toggleCheckChip('${c}')">${c}</button>`).join('')}</div>
+ <label style="margin-top:10px">One line, if you like</label><input id="ckJournal" value="${esc(ex.journal)}" placeholder="One line about today…">
+ <div class="row" style="margin-top:14px"><button id="ckSubmit" ${ex.weather&&ex.battery?'':'disabled'} onclick="submitCheck()">Save check-in</button><button class="ghost" onclick="document.getElementById('checkinModal').classList.remove('open')">Close</button></div>`;
+ $('#checkinModal').classList.add('open');
+}
+function setCheck(k,v){let ex=state.checkins.find(c=>c.date===T);if(!ex){ex={date:T,weather:'',battery:'',chips:[],journal:''};state.checkins.push(ex);}ex[k]=v;openCheckin();}
+function toggleCheckChip(c){let ex=state.checkins.find(x=>x.date===T);if(!ex){ex={date:T,weather:'',battery:'',chips:[],journal:''};state.checkins.push(ex);}const i=ex.chips.indexOf(c);if(i>=0)ex.chips.splice(i,1);else ex.chips.push(c);openCheckin();}
+function submitCheck(){let ex=state.checkins.find(c=>c.date===T);if(ex)ex.journal=$('#ckJournal').value.trim();save();document.getElementById('checkinModal').classList.remove('open');renderAll();toast('Check-in saved. Thank you.');}
+function parseQuick(text,kind){
+ const p={title:text,area:'',dur:0,due:'',top:false,repeat:''};
+ const dm=text.match(/~(\d+)\s*m/);if(dm){p.dur=Number(dm[1]);p.title=p.title.replace(dm[0],'');}
+ const am=text.match(/#(\w+)/);if(am){const a=AREAS.find(x=>x.toLowerCase()===am[1].toLowerCase());if(a)p.area=a;p.title=p.title.replace(am[0],'');}
+ if(/!/.test(p.title)){p.top=true;p.title=p.title.replace('!','');}
+ const pm=text.match(/@(\w+)/);if(pm){p.place=pm[1];p.title=p.title.replace(pm[0],'');}
+ const tm=text.match(/(\d{1,2})\s*(am|pm)/i);if(tm){let h=Number(tm[1]);if(tm[2].toLowerCase()==='pm'&&h<12)h+=12;p.time=h*60;p.title=p.title.replace(tm[0],'');}
+ const days={sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6,sun:0};
+ const low=p.title.toLowerCase();
+ if(/\btoday\b/.test(low)){p.due=T;p.title=p.title.replace(/today/gi,'');}
+ else if(/\btomorrow\b/.test(low)){p.due=TOM;p.title=p.title.replace(/tomorrow/gi,'');}
+ else{for(const k in days){const re=new RegExp('\\b'+k+'\\b','i');if(re.test(p.title)){let d=new Date(T+'T12:00:00');let diff=(days[k]-d.getDay()+7)%7;if(diff===0)diff=7;d.setDate(d.getDate()+diff);p.due=todayStr(d);p.title=p.title.replace(re,'');break;}}}
+ const rm=p.title.match(/every\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i);if(rm){p.repeat=rm[1];p.title=p.title.replace(rm[0],'');}
+ const dm2=p.title.match(/due\s+(fri|mon|tue|wed|thu|sat|sun)/i);if(dm2&&!p.due){const k=dm2[1].toLowerCase();let d=new Date(T+'T12:00:00');let diff=(days[k]-d.getDay()+7)%7;if(diff===0)diff=7;d.setDate(d.getDate()+diff);p.due=todayStr(d);p.title=p.title.replace(dm2[0],'');}
+ p.title=p.title.replace(/\s+/g,' ').trim();return p;}
+function quickChips(p){const chips=[];if(p.due)chips.push(fmt(p.due));if(p.dur)chips.push(p.dur+' min');if(p.area)chips.push(p.area);if(p.time)chips.push(fmtTime(p.time));if(p.top)chips.push("Today's three");if(p.place)chips.push('@'+p.place);if(p.repeat)chips.push('every '+p.repeat);return chips.map(c=>`<span class="chip">${esc(c)}</span>`).join(' ');}
+function openQuickAdd(){
+ $('#quickBox').innerHTML=`<h2>Quick add</h2><div class="row pilltabs" id="qaTypes">${['Task','Brain dump','Reminder','Event','Note','Habit'].map(t=>`<button class="${t==='Task'?'on':''}" onclick="setQAType('${t}')">${t}</button>`).join('')}</div>
+ <input id="qaInput" placeholder="Type one line… e.g. Call Sara tomorrow 5pm ~20m #People !" style="margin-top:12px">
+ <div id="qaChips" style="margin-top:8px"></div>
+ <p class="hint">Shortcuts: + today · + tomorrow · + today's three. One-line words that work: tomorrow, weekday names, 5pm, ~20m, #Area, !, due fri, every monday, @place.</p>
+ <div class="row"><button class="ghost small" onclick="qaShortcut('today')">+ today</button><button class="ghost small" onclick="qaShortcut('tomorrow')">+ tomorrow</button><button class="ghost small" onclick="qaShortcut('three')">+ today's three</button></div>
+ <div class="row" style="margin-top:14px"><button onclick="saveQA(false)">Save</button><button class="ghost" onclick="saveQA(true)">Save &amp; add another</button><button class="ghost" onclick="document.getElementById('quickModal').classList.remove('open')">Close</button></div>`;
+ window._qaType='Task';$('#quickModal').classList.add('open');
+ const inp=$('#qaInput');inp.focus();inp.addEventListener('input',()=>{$('#qaChips').innerHTML=quickChips(parseQuick(inp.value,window._qaType));});
+ inp.addEventListener('keydown',e=>{if(e.key==='Enter')saveQA(false)});
+}
+function setQAType(t){window._qaType=t;$$('#qaTypes button').forEach(b=>b.classList.toggle('on',b.textContent===t));}
+function qaShortcut(k){const inp=$('#qaInput');if(k==='today')inp.value+=' today';if(k==='tomorrow')inp.value+=' tomorrow';if(k==='three')inp.value+=' !';inp.dispatchEvent(new Event('input'));}
+function saveQA(another){const v=$('#qaInput').value.trim();if(!v){toast('Type something first.');return}const p=parseQuick(v,window._qaType);const type=window._qaType;
+ if(type==='Task')state.tasks.push({id:uid(),title:p.title,area:p.area||'Home',due:p.due||T,dur:p.dur||20,top:!!p.top,done:false,steps:[],tiny:'',later:false,from:''});
+ if(type==='Brain dump')state.brain.push({id:uid(),text:p.title});
+ if(type==='Reminder')state.events.push({id:uid(),title:p.title,date:p.due||TOM,start:p.time||9*60,dur:15,area:p.area||'Home'});
+ if(type==='Event')state.events.push({id:uid(),title:p.title,date:p.due||T,start:p.time||12*60,dur:p.dur||30,area:p.area||'Home'});
+ if(type==='Note')state.notes.push({id:uid(),title:p.title,body:'',date:T,pinned:false});
+ if(type==='Habit')state.habits.push({id:uid(),name:p.title,cue:'Pick a cue',tiny:'Tiny version',log:{},rest:[]});
+ save();if(another){$('#qaInput').value='';$('#qaChips').innerHTML='';$('#qaInput').focus();renderAll();toast('Added. Add another.');}else{document.getElementById('quickModal').classList.remove('open');renderAll();toast('Added.');}}
+let focusTimer=null,focusLeft=0,focusTotal=300,focusPaused=false,focusSound=null,audioCtx=null;
+function openFocus(prefill){
+ const ov=$('#focusov');ov.innerHTML=`<h1>Focus</h1><p class="hint">One thing at a time. Five minutes is a complete win.</p>
+ <input id="focusWhat" value="${esc(prefill||'')}" placeholder="What are you focusing on?" style="max-width:420px">
+ <button style="font-size:1.2em;padding:.8em 1.6em" onclick="startFocus(5)">Just 5 minutes</button>
+ <div class="row" style="justify-content:center">${[10,15,25,45,60].map(m=>`<button class="ghost" onclick="startFocus(${m})">${m} min</button>`).join('')}</div>
+ <div class="row" style="justify-content:center"><span class="hint">Sound:</span>${['Quiet','Brown noise','Pink noise','Rain'].map(s=>`<button class="ghost small" onclick="setFocusSound('${s}')">${s}</button>`).join('')}</div>
+ <div id="focusRun" style="display:none"><div style="position:relative;width:220px;height:220px;margin:10px auto"><svg width="220" height="220" viewBox="0 0 220 220"><circle cx="110" cy="110" r="95" fill="none" stroke="var(--line)" stroke-width="10"/><circle id="focusRing" cx="110" cy="110" r="95" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round" transform="rotate(-90 110 110)"/></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span class="bigclock" id="focusClock">5:00</span></div></div>
+ <div class="row" style="justify-content:center"><button class="ghost" onclick="toggleFocusPause()">Pause / resume</button><button class="ghost" onclick="addFocusMin()">+5 min</button><button onclick="endFocus(true)">Done</button></div>
+ <p><button class="ghost small" onclick="parkStray()">Park a stray thought</button></p></div>
+ <button class="ghost" onclick="endFocus(false)">End focus</button>`;
+ ov.classList.add('open');window._focusSound='Quiet';
+}
+function setFocusSound(s){window._focusSound=s;toast('Sound: '+s);if(focusTimer)playNoise(s);}
+function playNoise(kind){try{if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();stopNoise();if(kind==='Quiet')return;const len=audioCtx.sampleRate*2;const buf=audioCtx.createBuffer(1,len,audioCtx.sampleRate);const d=buf.getChannelData(0);let last=0;for(let i=0;i<len;i++){const white=Math.random()*2-1;if(kind==='Brown noise'){last=(last+0.02*white)/1.02;d[i]=last*3.5;}else if(kind==='Pink noise'){last=last*0.98+white*0.02;d[i]=last*4;}else{d[i]=white*0.35;}}
+ const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;const g=audioCtx.createGain();g.gain.value=0.12;src.connect(g);g.connect(audioCtx.destination);src.start();focusSound=src;}catch(e){}}
+function stopNoise(){try{if(focusSound)focusSound.stop();}catch(e){}focusSound=null;}
+function startFocus(mins){focusTotal=mins*60;focusLeft=focusTotal;focusPaused=false;$('#focusRun').style.display='block';playNoise(window._focusSound||'Quiet');clearInterval(focusTimer);tickFocus();focusTimer=setInterval(tickFocus,1000);}
+function tickFocus(){if(focusPaused)return;focusLeft--;if(focusLeft<=0){clearInterval(focusTimer);stopNoise();endFocus(true);return}const mm=Math.floor(focusLeft/60),ss=pad(focusLeft%60);const el=$('#focusClock');if(el)el.textContent=mm+':'+ss;const ringEl=$('#focusRing');if(ringEl){const c=2*Math.PI*95;ringEl.style.strokeDasharray=c;ringEl.style.strokeDashoffset=c*(1-focusLeft/focusTotal);}}
+function toggleFocusPause(){focusPaused=!focusPaused;toast(focusPaused?'Paused. Take a breath.':'Resumed.');}
+function addFocusMin(){focusLeft+=300;focusTotal+=300;toast('+5 minutes added.');}
+function parkStray(){const v=prompt('Stray thought to park:');if(!v)return;state.brain.push({id:uid(),text:v});save();toast('Parked in your brain dump. Back to focus.');}
+function endFocus(counted){clearInterval(focusTimer);stopNoise();if(counted){const doneMin=Math.round((focusTotal-focusLeft)/60);state.focusMinutes+=Math.max(1,doneMin);save();}$('#focusov').classList.remove('open');renderAll();if(counted)toast('Focus session finished. Well done.');}
+function renderToday(){
+ const now=new Date();const nowMin=now.getHours()*60+now.getMinutes();
+ const hr=now.getHours();const greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+ const name=state.settings.name||'Sam';
+ const todays=state.events.filter(e=>e.date===T).sort((a,b)=>a.start-b.start);
+ const current=todays.find(e=>nowMin>=e.start&&nowMin<e.start+e.dur);
+ const remain=current?(current.start+current.dur-nowMin):0;
+ const pct=current?Math.max(0,Math.min(100,Math.round(remain/current.dur*100))):0;
+ const ex=state.checkins.find(c=>c.date===T)||{};
+ const top3=state.tasks.filter(t=>t.top&&!t.done&&!t.later);
+ const visible=todaysTasks().filter(t=>!t.top&&(t.due===T||!t.due));
+ const hoursLeft=Math.max(0,Math.round((state.settings.dayEnd*60-nowMin)/60*10)/10);
+ const monW=(()=>{const d=new Date(T+'T12:00:00');const idx=(d.getDay()+6)%7;d.setDate(d.getDate()-idx);return d})();
+ const weekKeys=[...Array(7)].map((_,i)=>{const d=new Date(monW);d.setDate(monW.getDate()+i);return todayStr(d)});
+ const coming=[...state.events.filter(e=>e.date>=T).map(e=>({k:'e',...e})),...state.tasks.filter(t=>t.due&&t.due>=T&&!t.done&&!t.later).map(t=>({k:'t',...t}))].sort((a,b)=>(a.date||a.due).localeCompare(b.date||b.due)||((a.start||0)-(b.start||0))).slice(0,6);
+ $('#view-today').innerHTML=`<h1>${greet}, ${esc(name)}</h1><p class="hint">One calm page for today. Small steps count fully.</p>
+ <div class="row"><button class="${state.gentle?'':'ghost'}" onclick="state.gentle=!state.gentle;save();renderAll()">${state.gentle?'☀ Gentle day is on — showing short items only':'Gentle day'}</button><button class="ghost" onclick="openCheckin()">🌤 Check in</button><button class="ghost" onclick="showView('schedule')">🗓 Schedule</button></div>
+ <div class="card"><h2>Right now</h2>${current?`<div class="row"><div style="position:relative;width:110px;height:110px;flex:none"><svg width="110" height="110" viewBox="0 0 110 110"><circle cx="55" cy="55" r="44" fill="none" stroke="var(--line)" stroke-width="10"/><circle cx="55" cy="55" r="44" fill="none" stroke="var(--lime)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${2*Math.PI*44}" stroke-dashoffset="${2*Math.PI*44*(1-pct/100)}" transform="rotate(-90 55 55)"/></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center"><b>${remain} min<br><span class="tiny">left</span></b></div></div><div><b>${esc(current.title)}</b><p class="hint">${fmtTime(current.start)} · ${current.dur} min · ${current.area}</p><button class="ghost small" onclick="focusEvent('${current.id}')">Focus on this</button></div></div>`:`<p class="hint">Nothing timed right now. About ${hoursLeft} hours left in your day — pick one small thing.</p>`}</div>
+ <div class="card"><h2>Brain weather</h2><p class="hint">How does today feel so far? One tap saves it.</p><div class="row">${[['☀️','Sunny'],['🌤','Bright'],['☁️','Cloudy'],['🌧','Rainy'],['⛈','Stormy']].map(([e,l])=>`<button class="${ex.weather===l?'':'ghost'} small" onclick="quickWeather('${l}')">${e} ${l}</button>`).join('')}</div>${ex.weather?`<p class="hint">Today: ${esc(ex.weather)}${ex.battery?' · battery '+esc(ex.battery):''}. You can add more in Check in.</p>`:''}</div>
+ <div class="card"><h2>Today's three</h2>${top3.map(t=>`<div class="taskrow"><input type="checkbox" onchange="toggleTask('${t.id}')"><div style="flex:1"><b>${esc(t.title)}</b>${t.tiny?`<br><span class="hint">First tiny step: ${esc(t.tiny)}</span>`:''}<br><span class="chip ${AREA_TINT[t.area]}">${t.area}</span> <span class="chip">${t.dur} min</span></div><button class="ghost small" onclick="taskDetail('${t.id}')">Open</button></div>`).join('')||'<p class="hint">Nothing in your three yet. Pick up to three in Tasks — small ones are perfect.</p>'}</div>
+ <div class="card"><h2>Your day</h2><p class="hint">Now: ${fmtTime(nowMin)} · about ${hoursLeft} hours left today</p>${todays.map(e=>`<p>${nowMin>=e.start&&nowMin<e.start+e.dur?'▶ <b>now</b> — ':''}⏰ ${fmtTime(e.start)} — ${esc(e.title)} <span class="chip ${AREA_TINT[e.area]}">${e.area}</span></p>`).join('')||'<p class="hint">No timed events today.</p>'}<button class="ghost small" onclick="showView('schedule')">Open the schedule</button></div>
+ <div class="card"><h2>Little habits</h2>${state.habits.map(h=>{const weekCount=weekKeys.filter(k=>h.log[k]).length;return `<div class="taskrow"><input type="checkbox" ${h.log[T]==='done'?'checked':''} onchange="toggleHabit('${h.id}','${T}')"><div style="flex:1"><b>${esc(h.name)}</b><br><span class="hint">${esc(h.cue)} · ${weekCount} of 7 days this week</span></div></div>`}).join('')||'<p class="hint">No habits yet — add one in Habits.</p>'}</div>
+ <div class="card"><h2>Coming up</h2>${coming.map(x=>x.k==='e'?`<p>⏰ ${fmt(x.date)} ${fmtTime(x.start)} — ${esc(x.title)}</p>`:`<p>☐ ${fmt(x.due)} — ${esc(x.title)}</p>`).join('')||'<p class="hint">Nothing coming up.</p>'}</div>
+ <div class="card"><h2>On your mind</h2>${state.brain.slice(0,4).map(b=>`<p>💭 ${esc(b.text)}</p>`).join('')||'<p class="hint">Your brain dump is clear. Nice.</p>'}<button class="ghost small" onclick="showView('braindump')">Open brain dump</button></div>
+ <div class="card"><h2>Today's list</h2>${visible.filter(t=>!t.top).slice(0,8).map(t=>`<div class="taskrow"><input type="checkbox" onchange="toggleTask('${t.id}')"><span style="flex:1">${esc(t.title)} <span class="chip">${t.dur} min</span></span></div>`).join('')||'<p class="hint">Nothing else for today.</p>'}</div>`;
+}
+function quickWeather(l){let ex=state.checkins.find(c=>c.date===T);if(!ex){ex={date:T,weather:'',battery:'',chips:[],journal:''};state.checkins.push(ex);}ex.weather=l;save();renderAll();toast('Weather saved: '+l+'.');}
+function focusEvent(id){const e=state.events.find(x=>x.id===id);if(e)openFocus(e.title);}
+function renderBrain(){
+ $('#view-braindump').innerHTML=`<h1>Brain dump</h1><p class="hint">Get it out of your head first. Sorting can wait — nothing here is a task until you say so.</p>
+ <div class="card"><div class="row"><input id="brainAdd" placeholder="Anything on your mind? Type it here…"><button onclick="addBrain()">Add thought</button></div></div>
+ <div class="card"><h2>Unsorted thoughts (${state.brain.length})</h2>${state.brain.map(b=>`<div class="taskrow"><span style="flex:1">💭 ${esc(b.text)}</span><button class="small" onclick="sortBrain('${b.id}')">Sort</button><button class="ghost small" onclick="parkBrain('${b.id}')">Later</button><button class="ghost small" onclick="delBrain('${b.id}')">Delete</button></div>`).join('')||'<p class="hint">Nothing unsorted. A clear head is a good place to start.</p>'}<button class="ghost" onclick="sortFirstBrain()">Sort them one at a time</button></div>
+ <div class="card"><h2>In later</h2>${state.later.map(b=>`<div class="taskrow"><span style="flex:1">💭 ${esc(b.text)}</span><button class="ghost small" onclick="bringBackLater('${b.id}')">Bring back</button><button class="ghost small" onclick="delLater('${b.id}')">Delete</button></div>`).join('')||'<p class="hint">Nothing parked in Later.</p>'}</div>`;
+ const inp=$('#brainAdd');if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')addBrain()});
+}
+function addBrain(){const v=$('#brainAdd').value.trim();if(!v)return;state.brain.push({id:uid(),text:v});save();renderAll();}
+function delBrain(id){state.brain=state.brain.filter(x=>x.id!==id);save();renderAll();}
+function parkBrain(id){const b=state.brain.find(x=>x.id===id);if(!b)return;state.brain=state.brain.filter(x=>x.id!==id);state.later.push(b);save();renderAll();toast('Parked in Later.');}
+function bringBackLater(id){const b=state.later.find(x=>x.id===id);if(!b)return;state.later=state.later.filter(x=>x.id!==id);state.brain.push(b);save();renderAll();}
+function delLater(id){state.later=state.later.filter(x=>x.id!==id);save();renderAll();}
+function sortFirstBrain(){if(!state.brain.length){toast('Nothing to sort.');return}sortBrain(state.brain[0].id);}
+function sortBrain(id){const b=state.brain.find(x=>x.id===id);if(!b)return;
+ modal(`<h2>Sort this thought</h2><p>💭 ${esc(b.text)}</p><p class="hint">Turn it into one thing. The rest can stay parked.</p><div class="row"><button onclick="sortBrainTo('${id}','task')">→ Task</button><button class="ghost" onclick="sortBrainTo('${id}','event')">→ Event</button><button class="ghost" onclick="sortBrainTo('${id}','note')">→ Note</button><button class="ghost" onclick="sortBrainTo('${id}','habit')">→ Habit</button></div><button class="ghost" style="margin-top:10px" onclick="closeModal()">Keep it unsorted</button>`);}
+function sortBrainTo(id,kind){const b=state.brain.find(x=>x.id===id);if(!b)return;state.brain=state.brain.filter(x=>x.id!==id);
+ if(kind==='task')state.tasks.push({id:uid(),title:b.text,area:'Home',due:T,dur:15,top:false,done:false,steps:[],tiny:'',later:false,from:''});
+ if(kind==='event')state.events.push({id:uid(),title:b.text,date:TOM,start:12*60,dur:30,area:'Home'});
+ if(kind==='note')state.notes.push({id:uid(),title:b.text,body:'',date:T,pinned:false});
+ if(kind==='habit')state.habits.push({id:uid(),name:b.text,cue:'Pick a cue',tiny:'Tiny version',log:{},rest:[]});
+ save();closeModal();renderAll();toast('Sorted into '+kind+'.');}
+function renderSchedule(){
+ const day=state.schedDay||T;const nowMin=new Date().getHours()*60+new Date().getMinutes();
+ const d0=new Date(day+'T12:00:00');const idx=(d0.getDay()+6)%7;const mon=new Date(d0);mon.setDate(d0.getDate()-idx);
+ const weekDays=[...Array(7)].map((_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return todayStr(d)});
+ const dayEvents=state.events.filter(e=>e.date===day).sort((a,b)=>a.start-b.start);
+ const untimed=state.tasks.filter(t=>!t.done&&!t.later&&(t.due===day||!t.due));
+ $('#view-schedule').innerHTML=`<h1>Schedule</h1><p class="hint">Your day as a timeline. Empty time is fine — it is not a gap to fill.</p>
+ <div class="row"><button class="ghost" onclick="state.schedDay=addDays('${day}',-1);renderAll()">‹ Prev day</button><button class="ghost" onclick="state.schedDay=T;renderAll()">Today</button><button class="ghost" onclick="state.schedDay=addDays('${day}',1);renderAll()">Next day ›</button><button class="ghost" onclick="addEventPrompt('${day}')">+ Add to the schedule</button><button class="ghost" onclick="runningLate('${day}')">Running late?</button></div>
+ <div class="row pilltabs" style="margin-top:10px">${weekDays.map(d=>`<button class="${d===day?'on':''}" onclick="state.schedDay='${d}';renderAll()">${fmt(d)}</button>`).join('')}</div>
+ <h2 style="margin-top:16px">${fmt(day)}</h2>
+ <div class="timeline">${[...Array(Math.max(1,state.settings.dayEnd-state.settings.dayStart+1))].map((_,i)=>{const h=state.settings.dayStart+i;const hs=dayEvents.filter(e=>e.start>=h*60&&e.start<(h+1)*60);const isNow=day===T&&nowMin>=h*60&&nowMin<(h+1)*60;return `<div class="hour"><b>${fmtTime(h*60)}</b>${isNow?`<div class="nowline" style="margin:6px 0"></div>`:''}${hs.map(e=>`<div class="ev ${AREA_TINT[e.area]}">⏰ ${fmtTime(e.start)} — ${esc(e.title)} · ${e.dur} min</div>`).join('')}</div>`}).join('')}</div>
+ <div class="card"><h2>Not on the clock yet</h2>${untimed.map(t=>`<div class="taskrow"><span style="flex:1">☐ ${esc(t.title)} <span class="chip">${t.dur} min</span></span><button class="ghost small" onclick="findSlot('${t.id}','${day}')">Find a slot</button></div>`).join('')||'<p class="hint">Everything is on the clock. Nice.</p>'}
+ <label style="margin-top:10px"><input type="checkbox" ${state.settings.buffer?'checked':''} onchange="state.settings.buffer=this.checked;save();renderAll()"> 50% time buffer on — plan durations with extra breathing room</label></div>
+ <div class="card"><button onclick="addEventPrompt('${day}')">+ Add to the schedule</button></div>`;
+}
+function runningLate(day){const nowMin=new Date().getHours()*60+new Date().getMinutes();let moved=0;
+ state.events.filter(e=>e.date===day&&(day!==T||e.start+e.dur>nowMin)).forEach(e=>{e.start+=30;moved++;});
+ save();renderAll();toast(moved?moved+' event(s) moved 30 minutes later. Everything still fits.':'Nothing left to move today.');}
+function findSlot(taskId,day){const t=state.tasks.find(x=>x.id===taskId);if(!t)return;
+ const busy=state.events.filter(e=>e.date===day).map(e=>[e.start,e.start+e.dur]).sort((a,b)=>a[0]-b[0]);
+ let slot=-1;for(let s=state.settings.dayStart*60;s+ t.dur<=state.settings.dayEnd*60;s+=15){const e=s+t.dur;if(!busy.some(([bs,be])=>s<be&&e>bs)){slot=s;break;}}
+ if(slot<0){toast('No free slot that day — try another day.');return}
+ state.events.push({id:uid(),title:t.title,date:day,start:slot,dur:t.dur,area:t.area});if(!t.due)t.due=day;save();renderAll();toast('Slotted at '+fmtTime(slot)+' on '+fmt(day)+'.');}
+function addEventPrompt(dateStr){
+ modal(`<h2>Add to the schedule</h2><p class="hint">${fmt(dateStr)}</p><label>Title</label><input id="evTitle" placeholder="What is it?">
+ <label>Time</label><input id="evTime" type="time" value="12:00">
+ <label>Duration (minutes)</label><input id="evDur" type="number" value="30" min="5" step="5">
+ <label>Area</label><select id="evArea">${AREAS.map(a=>`<option>${a}</option>`).join('')}</select>
+ <div class="row" style="margin-top:14px"><button onclick="addEventSave('${dateStr}')">Save event</button><button class="ghost" onclick="closeModal()">Cancel</button></div>`);}
+function addEventSave(dateStr){const title=$('#evTitle').value.trim();if(!title){toast('Add a title first.');return}
+ const tv=$('#evTime').value||'12:00';const parts=tv.split(':');const start=Number(parts[0])*60+Number(parts[1]||0);
+ const dur=Number($('#evDur').value)||30;const area=$('#evArea').value||'Home';
+ state.events.push({id:uid(),title,date:dateStr,start,dur,area});save();closeModal();renderAll();toast('Event added.');}
+function stuckFor(taskId){const t=state.tasks.find(x=>x.id===taskId);if(!t)return;
+ const suggestion=t.tiny||(t.steps.find(s=>!s.done)||{}).t||'Just open what you need and give it two minutes — opening it is the whole first step.';
+ modal(`<h2>Help me start</h2><p><b>${esc(t.title)}</b> · ${t.dur} min</p><p class="hint">A tiny first step is a complete start. Edit it if you like, then save it.</p>
+ <label>First tiny step</label><input id="tinyIn" value="${esc(suggestion)}">
+ <div class="row" style="margin-top:14px"><button onclick="saveTiny('${taskId}')">Save this tiny step</button><button class="ghost" onclick="closeModal();taskDetail('${taskId}')">Open task</button><button class="ghost" onclick="closeModal()">Close</button></div>`);}
+function toggleTask(id){const t=state.tasks.find(x=>x.id===id);if(!t)return;t.done=!t.done;save();renderAll();}
+function renderAll(){applySettings();renderNav();renderToday();renderBrain();renderSchedule();renderTasks();renderWeek();renderMonth();renderHabits();renderRoutines();renderGoals();renderUpcoming();renderNotes();renderProgress();renderMoney();renderMeals();renderHome();renderWork();renderWellness();renderSettings();}
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;if(e.key==='n'||e.key==='N')openQuickAdd();if(e.key==='f'||e.key==='F')openFocus();if(e.key==='Escape'){closeModal();$('#checkinModal').classList.remove('open');$('#quickModal').classList.remove('open');$('#moresheet').classList.remove('open');}});
+applySettings();renderAll();
+</script></body></html>
