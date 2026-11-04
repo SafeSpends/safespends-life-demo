@@ -100,7 +100,7 @@ input[type=range]{padding:0}
 @media(min-width:960px){
   .sidebar{display:block}
   header.top{display:none}
-  .wrap{max-width:860px; margin:0 0 0 250px; padding:24px 24px 40px}
+  .wrap{margin:0 0 0 250px; padding:24px 24px 40px}
   .bottombar{display:none}
 }
 
@@ -109,7 +109,7 @@ input[type=range]{padding:0}
 <div style="position:sticky;top:0;z-index:999;background:#C05B2E;color:#FBF6EE;text-align:center;padding:10px 12px;font-weight:700;font-size:14px">FREE DEMO · Sample data · Nothing you change here is saved — reload to reset everything</div>
 <nav class="sidebar" id="sidebar">
 <div class="logo">Safe<span>Spends</span> Life</div>
-<p class="hint" style="margin:4px 0 12px">Your whole life, in one calm place. No account. Your data stays only on this device.</p>
+<button class="sidebtn" id="modeBtn" onclick="toggleMode()">🌙 Dark mode</button>
 <button class="sidebtn" onclick="openQuickAdd()">＋ Quick add (N)</button>
 <button class="sidebtn" onclick="openFocus()">◉ Focus (F)</button>
 <div id="navlist"></div>
@@ -125,7 +125,7 @@ input[type=range]{padding:0}
 <p class="hint" style="margin-top:14px">One-time purchase product. No subscription, no login, no cloud sync.</p>
 </nav>
 <div class="wrap">
-<header class="top"><div class="mark">S</div><div class="brand">SafeSpends<small>Life Planner</small></div><div class="topsp"></div><button class="iconbtn" onclick="openQuickAdd()" title="Quick add">＋</button><button class="iconbtn" onclick="openFocus()" title="Focus">◉</button><button class="iconbtn" onclick="openCheckin()" title="Check in">🌤</button></header>
+<header class="top"><div class="mark">S</div><div class="brand">SafeSpends<small>Life Planner</small></div><div class="topsp"></div><button class="iconbtn" onclick="openQuickAdd()" title="Quick add">＋</button><button class="iconbtn" onclick="openFocus()" title="Focus">◉</button><button class="iconbtn" onclick="openCheckin()" title="Check in">🌤</button><button class="iconbtn" id="modeBtnM" onclick="toggleMode()" title="Dark / Light mode">🌙</button></header>
 <main>
 <section class="view active" id="view-today"></section>
 <section class="view" id="view-braindump"></section>
@@ -146,7 +146,7 @@ input[type=range]{padding:0}
 <section class="view" id="view-wellness"></section>
 <section class="view" id="view-settings"></section>
 </main>
-<p class="footer-note">Your whole life, in one calm place. No account. Your data stays only on this device.</p>
+
 <p class="footer-note">One-time purchase product. No subscription, no login, no cloud sync.</p>
 </div>
 <nav class="bottombar">
@@ -206,11 +206,13 @@ let state;if(window.__DEMO__){state=sample()}else{try{state=JSON.parse(localStor
 if(!state.settings)state=sample();
 function save(){if(window.__DEMO__)return;try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}}
 function applySettings(){document.documentElement.setAttribute('data-theme',state.settings.dark?'dark':'light');document.documentElement.style.setProperty('--fs',state.settings.textSize+'px');const accents=['#C05B2E','#2E7D6B','#3A6EA5','#7A5C9E','#B03A5B','#8A6D1B'];const acc=accents[state.settings.theme||0];const st=document.documentElement.style;st.setProperty('--accent',acc);st.setProperty('--lime',acc);const _r=parseInt(acc.slice(1,3),16),_g=parseInt(acc.slice(3,5),16),_b=parseInt(acc.slice(5,7),16);const _dk=v=>Math.round(v*0.72);st.setProperty('--limeD','#'+[_dk(_r),_dk(_g),_dk(_b)].map(v=>v.toString(16).padStart(2,'0')).join(''));st.setProperty('--limeInk',(0.299*_r+0.587*_g+0.114*_b)>150?'#3B2A20':'#FFFFFF');}
+function toggleMode(){state.settings.dark=!state.settings.dark;save();applySettings();renderAll();}
+function refreshModeBtns(){const b=$('#modeBtn');if(b)b.textContent=state.settings.dark?'☀️ Light mode':'🌙 Dark mode';const m=$('#modeBtnM');if(m)m.textContent=state.settings.dark?'☀️':'🌙';}
 const NAV=[['today','🏠 Today'],['braindump','💭 Brain dump'],['schedule','🗓 Schedule'],['tasks','✓ Tasks'],['week','📅 This week'],['month','🗓 Month'],['habits','🌱 Habits'],['routines','🔁 Routines'],['goals','🎯 Goals & projects'],['upcoming','⏭ Upcoming'],['notes','📝 Notes'],['progress','📈 Progress']];
 function renderNav(){const counts={braindump:state.brain.length,tasks:state.tasks.filter(t=>!t.done&&!t.later).length,habits:state.habits.length,goals:state.goals.filter(g=>!g.done).length};
  $('#navlist').innerHTML='<div class="sidegroup">PLAN YOUR DAY</div>'+NAV.slice(0,6).map(([id,l])=>`<button class="sidebtn" data-nav="${id}">${l}${counts[id]?`<span class="badge">${counts[id]}</span>`:''}</button>`).join('')+'<div class="sidegroup">RHYTHMS</div>'+NAV.slice(6,8).map(([id,l])=>`<button class="sidebtn" data-nav="${id}">${l}${counts[id]?`<span class="badge">${counts[id]}</span>`:''}</button>`).join('')+'<div class="sidegroup">BIGGER PICTURE</div>'+NAV.slice(8).map(([id,l])=>`<button class="sidebtn" data-nav="${id}">${l}${counts[id]?`<span class="badge">${counts[id]}</span>`:''}</button>`).join('');
  $('#sheetlist').innerHTML=NAV.map(([id,l])=>`<button class="ghost" onclick="showView('${id}');document.getElementById('moresheet').classList.remove('open')">${l}</button>`).join('')+['money','meals','home','work','wellness','settings'].map(id=>`<button class="ghost" onclick="showView('${id}');document.getElementById('moresheet').classList.remove('open')">${id}</button>`).join('');
- $$('[data-nav]').forEach(b=>b.onclick=()=>showView(b.dataset.nav));}
+ $$('[data-nav]').forEach(b=>b.onclick=()=>showView(b.dataset.nav));refreshModeBtns();}
 let current='today';
 function showView(id){current=id;$$('.view').forEach(v=>v.classList.remove('active'));const el=$('#view-'+id);if(el)el.classList.add('active');$$('[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===id));window.scrollTo(0,0);renderAll();}
 function ring(pct,size){size=size||110;const r=44,c=2*Math.PI*r,off=c*(1-pct/100);return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 110 110"><circle class="bg" cx="55" cy="55" r="${r}"/><circle class="fg" cx="55" cy="55" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 55 55)"/><text x="55" y="60" text-anchor="middle" font-size="20" font-weight="700" fill="var(--ink)">${Math.round(pct)}%</text></svg>`;}
