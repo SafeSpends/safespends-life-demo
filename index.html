@@ -87,6 +87,7 @@ input[type=range]{padding:0}
 .bottombar{position:fixed; left:0; right:0; bottom:0; background:var(--nav); backdrop-filter:blur(12px); border-top:1px solid var(--line); z-index:40; display:flex; justify-content:space-around; max-width:620px; margin:0 auto; padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
 .bottombar button{background:none; border:none; color:var(--mut); font-size:11.5px; font-weight:700; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; padding:5px 8px; border-radius:10px}
 .bottombar button.active{color:var(--ink); box-shadow:inset 0 3px 0 var(--vio)}
+.bottombar .plus{flex:none; align-self:flex-start; width:52px; height:52px; border-radius:50%; background:var(--lime); color:var(--limeInk); font-size:27px; line-height:1; padding:0; margin:-20px 0 0; box-shadow:0 6px 18px rgba(0,0,0,.35); border:3px solid var(--bg)}
 .footer-note{text-align:center; color:var(--mut); font-size:13px; margin:26px 0 4px; line-height:1.5; padding:0 10px}
 .view{display:none} .view.active{display:block}
 
@@ -125,7 +126,7 @@ input[type=range]{padding:0}
 <p class="hint" style="margin-top:14px">One-time purchase product. No subscription, no login, no cloud sync.</p>
 </nav>
 <div class="wrap">
-<header class="top"><div class="mark">S</div><div class="brand">SafeSpends<small>Life Planner</small></div><div class="topsp"></div><button class="iconbtn" onclick="openQuickAdd()" title="Quick add">＋</button><button class="iconbtn" onclick="openFocus()" title="Focus">◉</button><button class="iconbtn" onclick="openCheckin()" title="Check in">🌤</button><button class="iconbtn modetoggle" id="modeBtnM" onclick="toggleMode()" title="Dark / Light mode">◐</button></header>
+<header class="top"><div class="mark">S</div><div class="brand">SafeSpends<small>Life Planner</small></div><div class="topsp"></div><button class="iconbtn" onclick="openFocus()" title="Focus">◉</button><button class="iconbtn" onclick="openCheckin()" title="Check in">🌤</button><button class="iconbtn modetoggle" id="modeBtnM" onclick="toggleMode()" title="Dark / Light mode">◐</button></header>
 <main>
 <section class="view active" id="view-today"></section>
 <section class="view" id="view-braindump"></section>
@@ -152,7 +153,7 @@ input[type=range]{padding:0}
 <nav class="bottombar">
 <button data-nav="today" onclick="showView('today')">🏠<br>Today</button>
 <button data-nav="tasks" onclick="showView('tasks')">✓<br>Tasks</button>
-<button data-nav="braindump" onclick="showView('braindump')">💭<br>Brain dump</button>
+<button class="plus" onclick="openQuickAdd()" title="Quick add" aria-label="Quick add">＋</button>
 <button data-nav="habits" onclick="showView('habits')">🌱<br>Habits</button>
 <button onclick="document.getElementById('moresheet').classList.add('open')">⋯<br>More</button>
 </nav>
