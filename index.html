@@ -34,6 +34,7 @@ header.top{display:flex; align-items:center; gap:10px; padding:6px 2px 14px}
 .card{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:18px; margin:0 0 14px}
 .card h3{margin:0 0 4px; font-size:16.5px}
 .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.view>.row{margin-bottom:14px}
 .grow{flex:1}
 .mut{color:var(--mut)} .small{font-size:13px} .tiny{font-size:12px}
 .hint{color:var(--mut); font-size:.92em}
@@ -155,7 +156,7 @@ input[type=range]{padding:0}
 <button data-nav="habits" onclick="showView('habits')">🌱<br>Habits</button>
 <button onclick="document.getElementById('moresheet').classList.add('open')">⋯<br>More</button>
 </nav>
-<div class="sheet" id="moresheet"><h2>All sections</h2><div id="sheetlist" class="row"></div><button class="ghost" onclick="document.getElementById('moresheet').classList.remove('open')">Close</button></div>
+<div class="sheet" id="moresheet"><h2>All sections</h2><div id="sheetlist" class="row"></div><button class="ghost" style="margin-top:14px" onclick="document.getElementById('moresheet').classList.remove('open')">Close</button></div>
 <div class="modal" id="modal"><div class="modalbox" id="modalbox"></div></div>
 <div class="modal" id="checkinModal"><div class="modalbox" id="checkinBox"></div></div>
 <div class="modal" id="quickModal"><div class="modalbox" id="quickBox"></div></div>
@@ -210,7 +211,7 @@ function refreshModeBtns(){const b=$('#modeBtn');if(b)b.textContent='◐';const 
 const NAV=[['today','🏠 Today'],['braindump','💭 Brain dump'],['schedule','🗓 Schedule'],['tasks','✓ Tasks'],['week','📅 This week'],['month','🗓 Month'],['habits','🌱 Habits'],['routines','🔁 Routines'],['goals','🎯 Goals & projects'],['upcoming','⏭ Upcoming'],['notes','📝 Notes'],['progress','📈 Progress']];
 function renderNav(){const counts={braindump:state.brain.length,tasks:state.tasks.filter(t=>!t.done&&!t.later).length,habits:state.habits.length,goals:state.goals.filter(g=>!g.done).length};
  $('#navlist').innerHTML='<div class="sidegroup">PLAN YOUR DAY</div>'+NAV.slice(0,6).map(([id,l])=>`<button class="sidebtn" data-nav="${id}">${l}${counts[id]?`<span class="badge">${counts[id]}</span>`:''}</button>`).join('')+'<div class="sidegroup">RHYTHMS</div>'+NAV.slice(6,8).map(([id,l])=>`<button class="sidebtn" data-nav="${id}">${l}${counts[id]?`<span class="badge">${counts[id]}</span>`:''}</button>`).join('')+'<div class="sidegroup">BIGGER PICTURE</div>'+NAV.slice(8).map(([id,l])=>`<button class="sidebtn" data-nav="${id}">${l}${counts[id]?`<span class="badge">${counts[id]}</span>`:''}</button>`).join('');
- $('#sheetlist').innerHTML=NAV.map(([id,l])=>`<button class="ghost" onclick="showView('${id}');document.getElementById('moresheet').classList.remove('open')">${l}</button>`).join('')+['money','meals','home','work','wellness','settings'].map(id=>`<button class="ghost" onclick="showView('${id}');document.getElementById('moresheet').classList.remove('open')">${id}</button>`).join('');
+ $('#sheetlist').innerHTML=NAV.map(([id,l])=>`<button class="ghost" onclick="showView('${id}');document.getElementById('moresheet').classList.remove('open')">${l}</button>`).join('')+[['money','💰 Money'],['meals','🍽 Meals &amp; groceries'],['home','🏠 Home'],['work','💼 Work &amp; study'],['wellness','💚 Wellness'],['settings','⚙ Settings']].map(([id,l])=>`<button class="ghost" onclick="showView('${id}');document.getElementById('moresheet').classList.remove('open')">${l}</button>`).join('');
  $$('[data-nav]').forEach(b=>b.onclick=()=>showView(b.dataset.nav));$$('#navlist [data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===current));refreshModeBtns();}
 let current='today';
 function showView(id){current=id;$$('.view').forEach(v=>v.classList.remove('active'));const el=$('#view-'+id);if(el)el.classList.add('active');$$('[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===id));window.scrollTo(0,0);renderAll();}
